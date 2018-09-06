@@ -15,12 +15,55 @@
             },
             "backendUri": "http://localhost/api/asset/index.html"
         },
+        "proxy_index_manifest": {
+            "matchCondition": {
+                "methods": [ "GET" ],
+                "route": "/manifest.json"
+            },
+            "backendUri": "http://localhost/api/asset/manifest.json"
+        },
+        "proxy_index_asset_manifest": {
+            "matchCondition": {
+                "methods": [ "GET" ],
+                "route": "/asset-manifest.json"
+            },
+            "backendUri": "http://localhost/api/asset/asset-manifest.json"
+        },
+        "proxy_index_asset_service_worker": {
+            "matchCondition": {
+                "methods": [ "GET" ],
+                "route": "/service-worker.js"
+            },
+            "backendUri": "http://localhost/api/asset/service-worker.js"
+        },
+        "proxy_index_asset_favicon": {
+            "matchCondition": {
+                "methods": [ "GET" ],
+                "route": "/favicon.ico"
+            },
+            "backendUri": "http://localhost/api/asset/favicon.ico"
+        },
         "proxy_static_css_files": {
             "matchCondition": {
                 "methods": [ "GET" ],
                 "route": "/static/css/{*path}"
             },
-            "backendUri": "http://localhost/api/asset"
+            "backendUri": "http://localhost/api/asset/{path}"
+        },
+        "proxy_static_js_files": {
+            "matchCondition": {
+                "methods": [ "GET" ],
+                "route": "/static/js/{*path}"
+            },
+            "backendUri": "http://localhost/api/asset/{path}"
+        },
+        "proxy_static_media_files": {
+            "matchCondition": {
+                "methods": [ "GET" ],
+                "route": "/static/media/{*path}"
+            },
+            "backendUri": "http://localhost/api/asset/{path}"
         }
     }
 }
+

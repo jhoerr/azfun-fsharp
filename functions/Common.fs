@@ -81,6 +81,7 @@ module Common =
         | "html" -> "text/html"
         | "png" -> "image/png"
         | "ico" -> "image/x-icon"
+        | "svg" -> "image/svg+xml"
         | _ -> "text/plain"
 
     /// <summary>
