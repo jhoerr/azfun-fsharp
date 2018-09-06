@@ -330,4 +330,4 @@ ASALocalRun/
 .mfractor/
 
 # static_files folder
-functions/static_files/
+functions/spa/

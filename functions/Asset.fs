@@ -26,9 +26,9 @@ module Asset =
         |> Path.GetDirectoryName // root folder
     
     
-    let craAssets = ["index.html"; "asset-manifest.json"; "favicon.ico"; "manifest.json"; "service-worker.js"]
+    let spaRootAsset = ["index.html"; "asset-manifest.json"; "favicon.ico"; "manifest.json"; "service-worker.js"]
     let assetFolder (path:string) =
-        if List.exists (fun file -> file = path) craAssets then ""
+        if List.exists (fun file -> file = path) spaRootAsset then ""
         elif path.EndsWith(".css") || path.EndsWith(".css.map") then "static/css/"
         elif path.EndsWith(".js") || path.EndsWith(".js.map") then "static/js/"
         elif path.EndsWith(".svg") || path.EndsWith(".png") then "static/media/"
@@ -41,7 +41,7 @@ module Asset =
     let resolveFilePath (log:TraceWriter) (req: HttpRequest) =
         let reqPath = req.Path.ToString().Replace("/api/asset/","")
         let subDir = assetFolder reqPath
-        let filePath = sprintf "%s/static_files/%s%s" deployPath subDir reqPath
+        let filePath = sprintf "%s/spa/%s%s" deployPath subDir reqPath
         sprintf "Retrieving %s from %s" reqPath filePath |> log.Info
         if File.Exists(filePath)
         then ok filePath
