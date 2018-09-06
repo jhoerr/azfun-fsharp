@@ -25,13 +25,24 @@ module Asset =
         |> Path.GetDirectoryName // bin folder
         |> Path.GetDirectoryName // root folder
     
+    
+    let spaRootAsset = ["index.html"; "asset-manifest.json"; "favicon.ico"; "manifest.json"; "service-worker.js"]
+    let assetFolder (path:string) =
+        if List.exists (fun file -> file = path) spaRootAsset then ""
+        elif path.EndsWith(".css") || path.EndsWith(".css.map") then "static/css/"
+        elif path.EndsWith(".js") || path.EndsWith(".js.map") then "static/js/"
+        elif path.EndsWith(".svg") || path.EndsWith(".png") then "static/media/"
+        else ""
+
     ///<summary>
     /// Resolve the file system path of the requested asset and
     /// ensure that it exists.
     ///</summary>
-    let resolveFilePath (req: HttpRequest) =
+    let resolveFilePath (log:TraceWriter) (req: HttpRequest) =
         let reqPath = req.Path.ToString().Replace("/api/asset/","")
-        let filePath = sprintf "%s/static_files/%s" deployPath reqPath
+        let subDir = assetFolder reqPath
+        let filePath = sprintf "%s/spa/%s%s" deployPath subDir reqPath
+        sprintf "Retrieving %s from %s" reqPath filePath |> log.Info
         if File.Exists(filePath)
         then ok filePath
         else fail (Status.NotFound, sprintf "Could not find %s" reqPath)
@@ -47,5 +58,5 @@ module Asset =
     ///</summary>
     let run (req: HttpRequest) (log: TraceWriter) =
         (fun () -> req)
-        >> resolveFilePath
+        >> resolveFilePath log
         >> constructResponse sendFile log
