@@ -96,7 +96,7 @@ workflows:
           filters: *filter-ignore-gh-pages
       - build_test_spa:
           filters: *filter-ignore-gh-pages
-      - publish:
+      - publish_to_test:
           requires:
             - build_test_functions
             - build_test_spa
