@@ -42,10 +42,9 @@ jobs:
     <<: *defaults
     steps:
       - checkout 
-      - run: cd functions
       - run: 
           name: Build Functions
-          command: dotnet build
+          command: cd functions && dotnet build
 # Job orchestration
 workflows:
   version: 2
