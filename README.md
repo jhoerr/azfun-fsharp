@@ -15,13 +15,11 @@ The functions are ultimately hosted within a web application by the Azure Functi
 npm i -g azure-functions-core-tools@core --unsafe-perm true
 ```
 
-
 ## Running the code
 
 1. Clone this repo.
 2. Open the folder in Visual Studio Code.
-3. From the command palette (cmd+shift+p or ctrl+shift+p) exec `restore` to restore NuGet packages.
-4. From the command palette exec `build`, then `run`. You should see the terminal light up as the Azure Functions runtime starts. 
+3. From the command palette exec `build`, then `run`. You should see the terminal light up as the Azure Functions runtime starts. 
 
 ## Functions
 
