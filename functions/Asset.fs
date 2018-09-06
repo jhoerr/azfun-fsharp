@@ -29,9 +29,10 @@ module Asset =
     /// Resolve the file system path of the requested asset and
     /// ensure that it exists.
     ///</summary>
-    let resolveFilePath (req: HttpRequest) =
+    let resolveFilePath (log:TraceWriter) (req: HttpRequest) =
         let reqPath = req.Path.ToString().Replace("/api/asset/","")
         let filePath = sprintf "%s/static_files/%s" deployPath reqPath
+        sprintf "Retrieving %s from %s" reqPath filePath |> log.Info
         if File.Exists(filePath)
         then ok filePath
         else fail (Status.NotFound, sprintf "Could not find %s" reqPath)
@@ -47,5 +48,5 @@ module Asset =
     ///</summary>
     let run (req: HttpRequest) (log: TraceWriter) =
         (fun () -> req)
-        >> resolveFilePath
+        >> resolveFilePath log
         >> constructResponse sendFile log

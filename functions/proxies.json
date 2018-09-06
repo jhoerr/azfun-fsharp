@@ -15,12 +15,12 @@
             },
             "backendUri": "http://localhost/api/asset/index.html"
         },
-        "proxy_static_files": {
+        "proxy_static_css_files": {
             "matchCondition": {
                 "methods": [ "GET" ],
-                "route": "/asset/{*path}"
+                "route": "/static/css/{*path}"
             },
-            "backendUri": "http://localhost/api/asset/{path}"
+            "backendUri": "http://localhost/api/asset"
         }
     }
 }
