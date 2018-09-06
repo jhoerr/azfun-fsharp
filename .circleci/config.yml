@@ -67,7 +67,7 @@ workflows:
   # Publish the style guide on successful build/test of master.
   build-test-and-publish:
     jobs:
-      - build_test_functions:
-          filters: *filter-ignore-gh-pages
+      #- build_test_functions:
+      #    filters: *filter-ignore-gh-pages
       - build_test_spa:
           filters: *filter-ignore-gh-pages
