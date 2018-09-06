@@ -14,10 +14,27 @@
       "problemMatcher": "$msCompile"
     },
     {
-      "label": "build",
+      "label": "build spa",
+      "type": "shell",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/app"
+      },
+      "command": "yarn build && cp -a build/. ../functions/spa/",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "build functions",
       "command": "dotnet build",
       "type": "shell",
-      "dependsOn": "clean",
+      "dependsOn": "build spa",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -59,7 +76,7 @@
       "label": "run",
       "identifier": "runFunctionsHost",
       "type": "shell",
-      "dependsOn": "build",
+      "dependsOn": "build functions",
       "group": {
         "kind": "build",
         "isDefault": true
