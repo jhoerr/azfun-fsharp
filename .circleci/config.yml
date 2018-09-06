@@ -27,7 +27,7 @@ aliases:
 # Default settings for all jobs 
 defaults: &defaults
   docker:
-      - image: microsoft/dotnet:<version>-sdk
+      - image: microsoft/dotnet:2.1-sdk
         environment:
           GIT_AUTHOR_NAME: iubot
           GIT_AUTHOR_EMAIL: iubot@iu.edu
