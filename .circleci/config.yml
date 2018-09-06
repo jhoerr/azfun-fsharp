@@ -91,7 +91,7 @@ workflows:
   # Build and test the code on every commit. 
   # Publish the style guide on successful build/test of master.
   build-test-and-publish:
-    publish_to_test:
+    jobs:
       - build_test_functions:
           filters: *filter-ignore-gh-pages
       - build_test_spa:
