@@ -17,11 +17,19 @@ aliases:
 
   - &restore-spa-build
     keys:
-      - v2-spa-build-{{ checksum "app/package.json" }}
+      - v2-spa-build-{{ .Branch }} #-{{ .Revision }}
   - &save-spa-build
     paths:
       - app/build
-    key: v2-spa-build-{{ checksum "app/package.json" }}
+    key: v2-spa-build-{{ .Branch }} #-{{ .Revision }}
+
+  - &restore-functions-build
+    keys:
+      - v2-functions-build-{{ .Branch }} #-{{ .Revision }}
+  - &save-functions-build
+    paths:
+      - functions/bin
+    key: v2-functions-build-{{ .Branch }} #-{{ .Revision }}
 
   # Branch Filtering
   - &filter-only-master
@@ -60,6 +68,22 @@ jobs:
       - run: 
           name: Test SPA app
           command: cd app && yarn test -w 1 --coverage
+  publish_to_test:
+    docker:
+      - image: microsoft/azure-cli
+    steps:
+      - checkout 
+      - restore_cache: *restore-spa-build
+      - restore_cache: *restore-functions-build
+      - run: 
+          name: Install Azure Functions Core Tools
+          command: npm i -g azure-functions-core-tools@core --unsafe-perm true
+      - run:
+          name: Login with Azure Service Principal
+          command: az login --service_principal -u $SERVICE_PRINCIPAL_USER -p $SERVICE_PRINCIPAL_PASSWORD --tenant $SERVICE_PRINCIPAL_TENANT
+      - run: 
+          name: Publish Test App Service
+          command: cd functions/bin/Debug/netstandard2.0 && func azure functionapp publish $FUNCTION_APP_TEST
 # Job orchestration
 workflows:
   version: 2
@@ -67,7 +91,12 @@ workflows:
   # Publish the style guide on successful build/test of master.
   build-test-and-publish:
     jobs:
-      #- build_test_functions:
-      #    filters: *filter-ignore-gh-pages
-      - build_test_spa:
+      - build_test_functions:
           filters: *filter-ignore-gh-pages
+      - :
+          filters: *filter-ignore-gh-pages
+      - publish:
+          requires:
+            - build_test_functions
+            - build_test_spa
+          context: azfun-fsharp
