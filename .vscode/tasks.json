@@ -8,6 +8,9 @@
       "presentation": {
         "reveal": "always"
       },
+      "options": {
+        "cwd": "${workspaceFolder}/functions"
+      },
       "problemMatcher": "$msCompile"
     },
     {
@@ -22,6 +25,9 @@
       "presentation": {
         "reveal": "always"
       },
+      "options": {
+        "cwd": "${workspaceFolder}/functions"
+      },
       "problemMatcher": "$msCompile"
     },
     {
@@ -30,6 +36,9 @@
       "type": "shell",
       "presentation": {
         "reveal": "always"
+      }, 
+      "options": {
+        "cwd": "${workspaceFolder}/functions"
       },
       "problemMatcher": "$msCompile"
     },
@@ -40,6 +49,9 @@
       "dependsOn": "clean release",
       "presentation": {
         "reveal": "always"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/functions"
       },
       "problemMatcher": "$msCompile"
     },
@@ -53,7 +65,7 @@
         "isDefault": true
       },
       "options": {
-        "cwd": "${workspaceFolder}/bin/Debug/netstandard2.0"
+        "cwd": "${workspaceFolder}/functions/bin/Debug/netstandard2.0"
       },
       "command": "func host start",
       "isBackground": true,
