@@ -9,11 +9,19 @@ aliases:
   # Cache Management
   - &restore-node-modules
     keys:
-      - v2-node-modules-{{ checksum "package.json" }}
+      - v2-node-modules-{{ checksum "app/package.json" }}
   - &save-node-modules
     paths:
-      - node_modules
-    key: v2-node-modules-{{ checksum "package.json" }}
+      - app/node_modules
+    key: v2-node-modules-{{ checksum "app/package.json" }}
+
+  - &restore-spa-build
+    keys:
+      - v2-spa-build-{{ checksum "app/package.json" }}
+  - &save-spa-build
+    paths:
+      - app/build
+    key: v2-spa-build-{{ checksum "app/package.json" }}
 
   # Branch Filtering
   - &filter-only-master
@@ -24,29 +32,20 @@ aliases:
     branches:
       ignore: gh-pages
   
-# Default settings for all jobs 
-defaults: &defaults
-  docker:
-      - image: microsoft/dotnet:2.1-sdk
-        environment:
-          GIT_AUTHOR_NAME: iubot
-          GIT_AUTHOR_EMAIL: iubot@iu.edu
-          GIT_COMMITTER_NAME: iubot
-          GIT_COMMITTER_EMAIL: iubot@iu.edu
-  working_directory: ~/repo
-
 # Job definitions. Job execution is orchestrated in the 'workflows' section.
 jobs:
   # Build and test the components
   build_test_functions:
-    <<: *defaults
+    docker:
+      - image: microsoft/dotnet:2.1-sdk
     steps:
       - checkout 
       - run: 
           name: Build Functions
           command: cd functions && dotnet build
   build_test_spa:
-    <<: *defaults
+    docker:
+      - image: circleci/node:8
     steps:
       - checkout 
       - restore_cache: *restore-node-modules
@@ -57,6 +56,7 @@ jobs:
       - run: 
           name: Build SPA app
           command: cd app && yarn build
+      - save_cache: *save-spa-build
       - run: 
           name: Test SPA app
           command: cd app && yarn test -w 1 --coverage
