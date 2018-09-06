@@ -25,7 +25,7 @@ npm i -g azure-functions-core-tools@core --unsafe-perm true
 
 ## Functions
 
-This repo contains three functions:
+This repo contains three functions. They are documented below along with example `curl` scripts. Note that the http `<port>` in the example script will be different on every machine. The Azure Functions runtime will tell you which port its hosting the functions on.  
 
 **Ping** 
 
@@ -48,7 +48,7 @@ This function demonstrates how to deserialize and validate a POST body, and crea
 
 *Request*
 ```
-curl -X POST -H "Content-Type: application/json" -d '{"FirstName":"John","LastName":"Hoerr"}' http://localhost:<port>/api/hello
+curl -X POST -d '{"FirstName":"John","LastName":"Hoerr"}' http://localhost:<port>/api/hello
 ```
 
 *Response*
@@ -71,6 +71,7 @@ curl http://localhost:<port>/
 <html>
 <head>
     <title>Hello!</title>
+    <link rel="stylesheet" href="/asset/site.css">
 </head>
 <body>
     <p>Hello, world!</p>
