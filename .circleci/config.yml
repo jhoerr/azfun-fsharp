@@ -45,6 +45,21 @@ jobs:
       - run: 
           name: Build Functions
           command: cd functions && dotnet build
+  build_test_spa:
+    <<: *defaults
+    steps:
+      - checkout 
+      - restore_cache: *restore-node-modules
+      - run: 
+          name: Install app packages
+          command: cd app && yarn install
+      - save_cache: *save-node-modules
+      - run: 
+          name: Build SPA app
+          command: cd app && yarn build
+      - run: 
+          name: Test SPA app
+          command: cd app && yarn test -w 1 --coverage
 # Job orchestration
 workflows:
   version: 2
@@ -53,4 +68,6 @@ workflows:
   build-test-and-publish:
     jobs:
        - build_test_functions:
+          filters: *filter-ignore-gh-pages
+      - build_test_spa:
           filters: *filter-ignore-gh-pages
