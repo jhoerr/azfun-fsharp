@@ -83,18 +83,18 @@ curl http://localhost:<port>/
 
 The Azure Functions platform recently introduced [Proxies](https://docs.microsoft.com/en-us/azure/azure-functions/functions-proxies) as a way to discretely route and redirect requests to other web/API services.
 
-Proxies play an important role in serving an SPA from a serverless platform. At a minimum, the client will need an `index.html` file and will potentially need other `.js`/`.css` assets. Proxies allow us to transparently satisfy a request to function webroot (`http://localhost:<port>/`) to a function (such as `Asset`) that can satisfy a request for the static `index.html` file. In this repo we serve the static assets from the file system, but in production you may wish to serve those assets from Azure Blob Storage or CDN.
+Proxies play an important role in serving an SPA from a serverless platform. At a minimum, the client will need an `index.html` file and will potentially need other `.js`/`.css` assets. Proxies allow us to transparently route a request for the function webroot (`http://localhost:<port>/`) to some function that can satisfy a request for the static `index.html` file (such as our `Asset` function). In this repo we serve the static assets from the file system, but in production you may wish to serve those assets from Azure Blob Storage or CDN.
 
 The `proxies.json` file contains the following proxy definitions to satisfy requests to the webroot and subsequent assets:  
 * `/` -> `/api/asset/index.html`  
 * `/index.html` -> `/api/asset/index.html`  
-* `/asset/{*path} -> `/api/asset/{path}`  
+* `/asset/{*path}` -> `/api/asset/{path}`  
 
 ## Error Handling
 
-This project uses [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/) to manage execution and handle errors. ROP is a pattern that keeps code clean anbd ensures all errors are handled and meaningfully reported. 
+This project uses [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/) to manage execution and handle errors. ROP is a pattern that keeps code clean and ensures all errors are handled and meaningfully reported. 
 
-Consider a POST request such as `Hello` above. To satisfy this request the POST body must be deserialized and validated. The essence of ROP is that we can break up these operations into discrete steps and create a workflow:
+To get a sense of ROP, consider a POST request such as `Hello` above. To satisfy this request the POST body must be deserialized and validated. In the ROP pattern we break up these operations into discrete workflow steps:
 
 ```
 request
