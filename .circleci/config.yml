@@ -51,6 +51,7 @@ jobs:
       - run: 
           name: Build Functions
           command: cd functions && dotnet build
+      - save_cache: *save-functions-build
   build_test_spa:
     docker:
       - image: circleci/node:8
@@ -90,7 +91,7 @@ workflows:
   # Build and test the code on every commit. 
   # Publish the style guide on successful build/test of master.
   build-test-and-publish:
-    jobs:
+    publish_to_test:
       - build_test_functions:
           filters: *filter-ignore-gh-pages
       - build_test_spa:
