@@ -76,8 +76,6 @@ jobs:
       - checkout 
       - restore_cache: *restore-spa-build
       - restore_cache: *restore-functions-build
-      - run: node -v
-      - run: npm -v
       - run: 
           name: Install NPM
           command: curl -L https://www.npmjs.com/install.sh | sh
