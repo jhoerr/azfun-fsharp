@@ -8,28 +8,28 @@ version: 2
 aliases:
   # Cache Management
   - &restore-node-modules
-    keys:
-      - v2-node-modules-{{ checksum "app/package.json" }}
+      keys:
+        - v2-yarn-packages-{{ checksum "app/package.json" }}
   - &save-node-modules
-    paths:
-      - app/node_modules
-    key: v2-node-modules-{{ checksum "app/package.json" }}
+      paths:
+        - ~/.cache/yarn    
+      key: v2-yarn-packages-{{ checksum "app/package.json" }}
 
   - &restore-spa-build
-    keys:
-      - v2-spa-build-{{ .Branch }}-{{ .Revision }}
+      keys:
+        - v2-spa-build-{{ .Branch }}-{{ .Revision }}
   - &save-spa-build
-    paths:
-      - app/build
-    key: v2-spa-build-{{ .Branch }}-{{ .Revision }}
+      paths:
+        - app/build
+      key: v2-spa-build-{{ .Branch }}-{{ .Revision }}
 
   - &restore-functions-build
-    keys:
-      - v2-functions-build-{{ .Branch }}-{{ .Revision }}
+      keys:
+        - v2-functions-build-{{ .Branch }}-{{ .Revision }}
   - &save-functions-build
-    paths:
-      - functions/bin/Debug/netstandard2.0/publish.zip
-    key: v2-functions-build-{{ .Branch }}-{{ .Revision }}
+      paths:
+        - functions/bin/Debug/netstandard2.0/publish.zip
+      key: v2-functions-build-{{ .Branch }}-{{ .Revision }}
 
   # Branch Filtering
   - &filter-only-master
@@ -56,7 +56,11 @@ jobs:
       - run: 
           name: Build SPA app
           command: cd app && yarn build
+      - run: ls -la app/build
       - save_cache: *save-spa-build
+      - run: ls -la app/build
+      - restore_cache: *restore-spa-build
+      - run: ls -la app/build
       - run: 
           name: Test SPA app
           command: cd app && yarn test -w 1 --coverage
