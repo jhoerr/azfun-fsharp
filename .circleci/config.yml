@@ -33,7 +33,7 @@ jobs:
     steps:
       - run:
           name: Create workspace
-          command: mkdir -p workspace
+          command: mkdir -p /tmp/workspace
       - checkout 
       - restore_cache: *restore-node-modules
       - run: 
@@ -48,9 +48,9 @@ jobs:
           command: cd app && yarn test -w 1 --coverage
       - run: 
           name: Save compiled SPA to workspace
-          command: cp -a app/build/. workspace/build/
+          command: cp -a app/build/. /tmp/workspace/build/
       - persist_to_workspace:
-          root: workspace
+          root: /tmp/workspace
           paths:
             - build
   build_test_functions:
@@ -58,7 +58,7 @@ jobs:
       - image: microsoft/dotnet:2.1-sdk
     steps:
       - attach_workspace:
-          at: workspace
+          at: /tmp/workspace
       - checkout 
       - run: 
           name: Bundle SPA assets with functions
@@ -71,9 +71,9 @@ jobs:
           command: cd functions/bin/Debug/netstandard2.0 && zip publish.zip ./*
       - run:
           name: Save compiled functions to workspace
-          command: cp functions/bin/Debug/netstandard2.0/publish.zip workspace/publish.zip
+          command: cp functions/bin/Debug/netstandard2.0/publish.zip /tmp/workspace/publish.zip
       - persist_to_workspace:
-          root: workspace
+          root: /tmp/workspace
           paths:
             - publish.zip
   publish_to_test:
@@ -81,13 +81,13 @@ jobs:
       - image: microsoft/azure-cli
     steps:
       - attach_workspace:
-          at: workspace
+          at: /tmp/workspace
       - run:
           name: Login with Azure Service Principal
           command: az login --service_principal -u $SERVICE_PRINCIPAL_USER -p $SERVICE_PRINCIPAL_PASSWORD --tenant $SERVICE_PRINCIPAL_TENANT
       - run: 
           name: Publish Test App Service
-          command: az webapp deployment source config-zip --name $FUNCTION_APP_TEST --resource-group $FUNCTION_APP_TEST_RESOURCE_GROUP --src workspace/publish.zip
+          command: az webapp deployment source config-zip --name $FUNCTION_APP_TEST --resource-group $FUNCTION_APP_TEST_RESOURCE_GROUP --src /tmp/workspace/publish.zip
 # Job orchestration
 workflows:
   version: 2
