@@ -76,6 +76,11 @@ jobs:
       - checkout 
       - restore_cache: *restore-spa-build
       - restore_cache: *restore-functions-build
+      - run: node -v
+      - run: npm -v
+      - run: 
+          name: Install NPM
+          command: curl -L https://www.npmjs.com/install.sh | sh
       - run: 
           name: Install Azure Functions Core Tools
           command: npm i -g azure-functions-core-tools@core --unsafe-perm true
