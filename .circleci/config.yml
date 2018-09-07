@@ -9,11 +9,11 @@ aliases:
   # Cache Management
   - &restore-node-modules
       keys:
-        - v2-yarn-packages-{{ checksum "app/package.json" }}
+        - v2-node-modules-{{ checksum "app/package.json" }}
   - &save-node-modules
       paths:
         - app/node_modules
-      key: v2-yarn-packages-{{ checksum "app/package.json" }}
+      key: v2-node-modules-{{ checksum "app/package.json" }}
 
   # Branch Filtering
   - &filter-only-master
