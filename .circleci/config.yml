@@ -68,7 +68,7 @@ jobs:
           command: cp -a app/build/. /tmp/workspace/publish/spa/
       - run: 
           name: Zip publish folder
-          command: cd /tmp/workspace/publish && zip publish.zip ./*
+          command: cd /tmp/workspace/publish && zip -r publish.zip ./*
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
@@ -81,7 +81,7 @@ jobs:
           at: /tmp/workspace
       - run:
           name: Login with Azure Service Principal
-          command: az login --service_principal -u $SERVICE_PRINCIPAL_USER -p $SERVICE_PRINCIPAL_PASSWORD --tenant $SERVICE_PRINCIPAL_TENANT
+          command: az login --service-principal -u $SERVICE_PRINCIPAL_USER -p $SERVICE_PRINCIPAL_PASSWORD --tenant $SERVICE_PRINCIPAL_TENANT
       - run: 
           name: Publish Test App Service
           command: az webapp deployment source config-zip --name $FUNCTION_APP_TEST --resource-group $FUNCTION_APP_TEST_RESOURCE_GROUP --src /tmp/workspace/publish/publish.zip
