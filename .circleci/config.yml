@@ -12,7 +12,7 @@ aliases:
         - v2-yarn-packages-{{ checksum "app/package.json" }}
   - &save-node-modules
       paths:
-        - ~/.cache/yarn    
+        - app/node_modules
       key: v2-yarn-packages-{{ checksum "app/package.json" }}
 
   # Branch Filtering
@@ -62,7 +62,7 @@ jobs:
       - checkout 
       - run: 
           name: Bundle SPA assets with functions
-          command: cp -a workspace/build/. ./functions/spa/
+          command: cp -a /tmp/workspace/build/. ./functions/spa/
       - run: 
           name: Build functions
           command: cd functions && dotnet build
