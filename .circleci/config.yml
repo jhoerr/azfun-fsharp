@@ -67,6 +67,7 @@ jobs:
       - checkout 
       - restore_cache: *restore-spa-build
       - run: pwd
+      - run: ls -la
       - run: ls -la app
       - run: ls -la functions
       - run: 
