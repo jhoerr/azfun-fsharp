@@ -15,22 +15,6 @@ aliases:
         - ~/.cache/yarn    
       key: v2-yarn-packages-{{ checksum "app/package.json" }}
 
-  - &restore-spa-build
-      keys:
-        - v2-spa-build-{{ .Branch }}-{{ .Revision }}
-  - &save-spa-build
-      paths:
-        - app/build
-      key: v2-spa-build-{{ .Branch }}-{{ .Revision }}
-
-  - &restore-functions-build
-      keys:
-        - v2-functions-build-{{ .Branch }}-{{ .Revision }}
-  - &save-functions-build
-      paths:
-        - functions/bin/Debug/netstandard2.0/publish.zip
-      key: v2-functions-build-{{ .Branch }}-{{ .Revision }}
-
   # Branch Filtering
   - &filter-only-master
     branches:
@@ -47,6 +31,9 @@ jobs:
     docker:
       - image: circleci/node:8
     steps:
+      - run:
+          name: Create workspace
+          command: mkdir -p workspace
       - checkout 
       - restore_cache: *restore-node-modules
       - run: 
@@ -56,48 +43,51 @@ jobs:
       - run: 
           name: Build SPA app
           command: cd app && yarn build
-      - run: ls -la app/build
-      - save_cache: *save-spa-build
-      - run: ls -la app/build
-      - run: rm -rf app/build
-      - restore_cache: *restore-spa-build
-      - run: ls -la app
-      - run: ls -la app/build
       - run: 
           name: Test SPA app
           command: cd app && yarn test -w 1 --coverage
+      - run: 
+          name: Save compiled SPA to workspace
+          command: cp -a app/build/. workspace/build/
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - build
   build_test_functions:
     docker:
       - image: microsoft/dotnet:2.1-sdk
     steps:
+      - attach_workspace:
+          at: workspace
       - checkout 
-      - restore_cache: *restore-spa-build
-      - run: pwd
-      - run: ls -la
-      - run: ls -la app
-      - run: ls -la functions
       - run: 
-          name: Bundle SPA assets with Functions
-          command: cp -a ./app/build/. ./functions/spa/
+          name: Bundle SPA assets with functions
+          command: cp -a workspace/build/. ./functions/spa/
       - run: 
-          name: Build Functions
+          name: Build functions
           command: cd functions && dotnet build
       - run:
-          name: Archive Compiled Functions + SPA
+          name: Archive compiled functions + SPA
           command: cd functions/bin/Debug/netstandard2.0 && zip publish.zip ./*
-      - save_cache: *save-functions-build
+      - run:
+          name: Save compiled functions to workspace
+          command: cp functions/bin/Debug/netstandard2.0/publish.zip workspace/publish.zip
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - publish.zip
   publish_to_test:
     docker:
       - image: microsoft/azure-cli
     steps:
-      - checkout 
-      - restore_cache: *restore-functions-build
+      - attach_workspace:
+          at: workspace
       - run:
           name: Login with Azure Service Principal
           command: az login --service_principal -u $SERVICE_PRINCIPAL_USER -p $SERVICE_PRINCIPAL_PASSWORD --tenant $SERVICE_PRINCIPAL_TENANT
       - run: 
           name: Publish Test App Service
-          command: az webapp deployment source config-zip --name $FUNCTION_APP_TEST --resource-group $FUNCTION_APP_TEST_RESOURCE_GROUP --src functions/bin/Debug/netstandard2.0/publish.zip
+          command: az webapp deployment source config-zip --name $FUNCTION_APP_TEST --resource-group $FUNCTION_APP_TEST_RESOURCE_GROUP --src workspace/publish.zip
 # Job orchestration
 workflows:
   version: 2
