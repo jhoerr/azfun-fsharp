@@ -66,9 +66,12 @@ jobs:
     steps:
       - checkout 
       - restore_cache: *restore-spa-build
+      - run: pwd
+      - run: ls -la app
+      - run: ls -la functions
       - run: 
           name: Bundle SPA assets with Functions
-          command: cp -a app/build/. functions/spa/
+          command: cp -a ./app/build/. ./functions/spa/
       - run: 
           name: Build Functions
           command: cd functions && dotnet build
