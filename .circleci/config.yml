@@ -1,0 +1,110 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+version: 2
+
+# Aliases are shorthand references for common settings.
+aliases:
+  # Cache Management
+  - &restore-node-modules
+      keys:
+        - v2-node-modules-{{ checksum "app/package.json" }}
+  - &save-node-modules
+      paths:
+        - app/node_modules
+      key: v2-node-modules-{{ checksum "app/package.json" }}
+
+  # Branch Filtering
+  - &filter-only-master
+    branches:
+      only:
+        - master
+  - &filter-ignore-gh-pages
+    branches:
+      ignore: gh-pages
+  
+# Job definitions. Job execution is orchestrated in the 'workflows' section.
+jobs:
+  # Build and test the Azure Functions
+  build_functions:
+    docker:
+      - image: microsoft/dotnet:2.1-sdk
+    steps:
+      - run:
+          # A workspace allows us to pass files/artifacts from job to job.
+          # We'll need this to build up the deployment package because
+          # the functions are built in one job, the SPA in another, and
+          # the need to be combined prior to publishing.
+          # https://circleci.com/blog/deep-diving-into-circleci-workspaces/
+          name: Create workspace
+          command: mkdir -p /tmp/workspace
+      - checkout 
+      - run: 
+          name: Build Functions
+          command: cd functions && dotnet build
+      - run:
+          name: Save compiled Functions to workspace
+          command: cp -a functions/bin/Debug/netstandard2.0/. /tmp/workspace/publish/
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - publish
+  # Build and test the React SPA; create deployment package
+  build_spa:
+    docker:
+      - image: circleci/node:8
+    steps:
+      - checkout 
+      - attach_workspace:
+          at: /tmp/workspace
+      - restore_cache: *restore-node-modules
+      - run: 
+          name: Install SPA packages
+          command: cd app && yarn install
+      - save_cache: *save-node-modules
+      - run: 
+          name: Build SPA app
+          command: cd app && yarn build
+      - run: 
+          name: Test SPA app
+          command: cd app && yarn test -w 1 --coverage
+      - run: 
+          name: Save compiled SPA to workspace
+          command: cp -a app/build/. /tmp/workspace/publish/spa/
+      - run: 
+          name: Create Functions + SPA publish package
+          command: cd /tmp/workspace/publish && zip -r publish.zip ./*
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - publish/publish.zip
+  # Publish the deployment package to the Azure Function App
+  publish_to_test:
+    docker:
+      - image: microsoft/azure-cli
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Login with Azure Service Principal
+          command: az login --service-principal -u $SERVICE_PRINCIPAL_USER -p $SERVICE_PRINCIPAL_PASSWORD --tenant $SERVICE_PRINCIPAL_TENANT
+      - run: 
+          name: Publish Functions + SPA package to Test Function App
+          command: az webapp deployment source config-zip --name $FUNCTION_APP_TEST --resource-group $FUNCTION_APP_TEST_RESOURCE_GROUP --src /tmp/workspace/publish/publish.zip
+# Job orchestration
+workflows:
+  version: 2
+  # Build and test the code on every commit. 
+  # Publish the style guide on successful build/test of master.
+  build-and-publish:
+    jobs:
+      - build_functions:
+          filters: *filter-ignore-gh-pages
+      - build_spa:
+          requires:
+            - build_functions
+      - publish_to_test:
+          requires:
+            - build_spa
+          context: azfun-fsharp

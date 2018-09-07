@@ -23,7 +23,7 @@
       "options": {
         "cwd": "${workspaceFolder}/app"
       },
-      "command": "yarn build && cp -a build/. ../functions/spa/",
+      "command": "yarn build",
       "isBackground": true,
       "presentation": {
         "reveal": "always"
@@ -76,7 +76,7 @@
       "label": "run",
       "identifier": "runFunctionsHost",
       "type": "shell",
-      "dependsOn": "build functions",
+      "dependsOn": ["build spa", "build functions"],
       "group": {
         "kind": "build",
         "isDefault": true
@@ -84,7 +84,7 @@
       "options": {
         "cwd": "${workspaceFolder}/functions/bin/Debug/netstandard2.0"
       },
-      "command": "func host start",
+      "command": "cp -a ../../../../app/build/. ./spa && func host start",
       "isBackground": true,
       "presentation": {
         "reveal": "always"
