@@ -78,7 +78,7 @@ jobs:
       - restore_cache: *restore-functions-build
       - run: 
           name: Install Node
-          command: curl -sL https://deb.nodesource.com/setup_8.x
+          command: curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
       - run: 
           name: Install Azure Functions Core Tools
           command: npm i -g azure-functions-core-tools@core --unsafe-perm true
