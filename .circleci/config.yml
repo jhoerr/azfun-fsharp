@@ -59,7 +59,9 @@ jobs:
       - run: ls -la app/build
       - save_cache: *save-spa-build
       - run: ls -la app/build
+      - run: rm -rf app/build
       - restore_cache: *restore-spa-build
+      - run: ls -la app
       - run: ls -la app/build
       - run: 
           name: Test SPA app
