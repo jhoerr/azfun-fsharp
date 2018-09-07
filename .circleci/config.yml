@@ -49,6 +49,8 @@ jobs:
       - run: 
           name: Save compiled SPA to workspace
           command: cp -a app/build/. /tmp/workspace/spa/
+      - run: which zip
+      - run: zip --version
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
