@@ -77,8 +77,8 @@ jobs:
       - restore_cache: *restore-spa-build
       - restore_cache: *restore-functions-build
       - run: 
-          name: Install NPM
-          command: curl -L https://www.npmjs.com/install.sh | sh
+          name: Install Node
+          command: apt-get install -y nodejs
       - run: 
           name: Install Azure Functions Core Tools
           command: npm i -g azure-functions-core-tools@core --unsafe-perm true
@@ -95,12 +95,12 @@ workflows:
   # Publish the style guide on successful build/test of master.
   build-test-and-publish:
     jobs:
-      - build_test_functions:
-          filters: *filter-ignore-gh-pages
-      - build_test_spa:
-          filters: *filter-ignore-gh-pages
+#      - build_test_functions:
+#          filters: *filter-ignore-gh-pages
+#      - build_test_spa:
+#          filters: *filter-ignore-gh-pages
       - publish_to_test:
-          requires:
-            - build_test_functions
-            - build_test_spa
+#          requires:
+#            - build_test_functions
+#            - build_test_spa
           context: azfun-fsharp
