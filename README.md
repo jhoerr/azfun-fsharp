@@ -104,3 +104,43 @@ request
 If any step in that workflow fails, the remaining steps are skipped and error information is returned to the client. If all steps succeed, a friendly greeting is returned to the client. ROP keeps the workflow front and center while abstracting the management of error information. 
 
 An F# implementation of ROP is provded by the [Chessie](https://github.com/fsprojects/Chessie) library.
+
+## Deploying to Azure
+
+This repo comes with a [Circle CI](https://circleci.com) [configuration](.circleci/config.yml) file that will build, test, package, and deploy the Functions app to Azure via the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest). 
+
+The Azure CLI requires authentication credentials in order to perform the deployment. It's best to use a non-person, [Service Principal](https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli?view=azure-cli-latest) account for this purpose. To create a Service Principal, you will need to get an Azure CLI instance authenticated with the account associated with your Functions App. You can either:  
++ install the Azure CLI locally and sign in with `az login`;  
++ or sign in to [Azure Cloud Shell](https://shell.azure.com/).
+
+Once you have an Azure CLI instance, run:
+
+```
+az ad sp create-for-rbac --name USERNAME --password PASSWORD
+```
+
+The result should be a block of text similar to:
+
+```
+{
+  "appId": "38f6...",
+  "displayName": "USERNAME",
+  "name": "http://USERNAME",
+  "password": "PASSWORD",
+  "tenant": "1113..."
+}
+```
+
+Browse to Circle CI. If you don't have a Circle CI account, create one now. It's free for public GitHub repos. Circle CI uses "Contexts" as a store for secrets that need to be available during the build. We'll create a Context now and add the appropriate secrets to it. 
+
+1. Browse to the *Add Projects* section, choose your repo, click *Set Up Project* and then *Start Building*. 
+2. In the *Settings* -> *Contexts* section, click *Create Context*.
+3. Name the context `azfun-fsharp`. Note: you can name it something different, but you'll need to update the context reference at the bottom of .circleci/config.yml.
+4. Add the following environment variables:  
+    + `SERVICE_PRINCIPAL_USER`: The Service Principal username url (e.g. http://USERNAME)  
+    + `SERVICE_PRINCIPAL_PASSWORD`: The Service Principal password  
+    + `SERVICE_PRINCIPAL_TENANT`: The Service Principal tenant  
+    + `FUNCTION_APP_TEST`: The name of your *test* Function App   
+    + `FUNCTION_APP_TEST_RESOURCE_GROUP`: The name of the Azure resource group your *test* Function App is in  
+
+Circle CI should now have the information it needs to build, test, package, and deploy your Function App + SPA.
