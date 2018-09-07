@@ -26,26 +26,32 @@ aliases:
   
 # Job definitions. Job execution is orchestrated in the 'workflows' section.
 jobs:
-  # Build and test the components
-  build_test_functions:
+  # Build and test the Azure Functions
+  build_functions:
     docker:
       - image: microsoft/dotnet:2.1-sdk
     steps:
       - run:
+          # A workspace allows us to pass files/artifacts from job to job.
+          # We'll need this to build up the deployment package because
+          # the functions are built in one job, the SPA in another, and
+          # the need to be combined prior to publishing.
+          # https://circleci.com/blog/deep-diving-into-circleci-workspaces/
           name: Create workspace
           command: mkdir -p /tmp/workspace
       - checkout 
       - run: 
-          name: Build functions
+          name: Build Functions
           command: cd functions && dotnet build
       - run:
-          name: Save functions package to workspace
+          name: Save compiled Functions to workspace
           command: cp -a functions/bin/Debug/netstandard2.0/. /tmp/workspace/publish/
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
             - publish
-  build_test_spa:
+  # Build and test the React SPA; create deployment package
+  build_spa:
     docker:
       - image: circleci/node:8
     steps:
@@ -54,7 +60,7 @@ jobs:
           at: /tmp/workspace
       - restore_cache: *restore-node-modules
       - run: 
-          name: Install app packages
+          name: Install SPA packages
           command: cd app && yarn install
       - save_cache: *save-node-modules
       - run: 
@@ -67,12 +73,13 @@ jobs:
           name: Save compiled SPA to workspace
           command: cp -a app/build/. /tmp/workspace/publish/spa/
       - run: 
-          name: Zip publish folder
+          name: Create Functions + SPA publish package
           command: cd /tmp/workspace/publish && zip -r publish.zip ./*
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
             - publish/publish.zip
+  # Publish the deployment package to the Azure Function App
   publish_to_test:
     docker:
       - image: microsoft/azure-cli
@@ -83,21 +90,21 @@ jobs:
           name: Login with Azure Service Principal
           command: az login --service-principal -u $SERVICE_PRINCIPAL_USER -p $SERVICE_PRINCIPAL_PASSWORD --tenant $SERVICE_PRINCIPAL_TENANT
       - run: 
-          name: Publish Test App Service
+          name: Publish Functions + SPA package to Test Function App
           command: az webapp deployment source config-zip --name $FUNCTION_APP_TEST --resource-group $FUNCTION_APP_TEST_RESOURCE_GROUP --src /tmp/workspace/publish/publish.zip
 # Job orchestration
 workflows:
   version: 2
   # Build and test the code on every commit. 
   # Publish the style guide on successful build/test of master.
-  build-test-and-publish:
+  build-and-publish:
     jobs:
-      - build_test_functions:
+      - build_functions:
           filters: *filter-ignore-gh-pages
-      - build_test_spa:
+      - build_spa:
           requires:
-            - build_test_functions
+            - build_functions
       - publish_to_test:
           requires:
-            - build_test_spa
+            - build_spa
           context: azfun-fsharp
