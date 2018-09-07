@@ -28,7 +28,7 @@ aliases:
       - v2-functions-build-{{ .Branch }} #-{{ .Revision }}
   - &save-functions-build
     paths:
-      - functions/bin
+      - functions/bin/Debug/netstandard2.0/publish.zip
     key: v2-functions-build-{{ .Branch }} #-{{ .Revision }}
 
   # Branch Filtering
@@ -43,15 +43,6 @@ aliases:
 # Job definitions. Job execution is orchestrated in the 'workflows' section.
 jobs:
   # Build and test the components
-  build_test_functions:
-    docker:
-      - image: microsoft/dotnet:2.1-sdk
-    steps:
-      - checkout 
-      - run: 
-          name: Build Functions
-          command: cd functions && dotnet build
-      - save_cache: *save-functions-build
   build_test_spa:
     docker:
       - image: circleci/node:8
@@ -69,25 +60,34 @@ jobs:
       - run: 
           name: Test SPA app
           command: cd app && yarn test -w 1 --coverage
+  build_test_functions:
+    docker:
+      - image: microsoft/dotnet:2.1-sdk
+    steps:
+      - checkout 
+      - restore_cache: *restore-spa-build
+      - run: 
+          name: Bundle SPA assets with Functions
+          command: cp -a app/build/. functions/spa/
+      - run: 
+          name: Build Functions
+          command: cd functions && dotnet build
+      - run:
+          name: Archive Compiled Functions + SPA
+          command: cd functions/bin/Debug/netstandard2.0 && zip publish.zip ./*
+      - save_cache: *save-functions-build
   publish_to_test:
     docker:
       - image: microsoft/azure-cli
     steps:
       - checkout 
-      - restore_cache: *restore-spa-build
       - restore_cache: *restore-functions-build
-      - run: 
-          name: Install Node
-          command: curl -sL https://deb.nodesource.com/setup_8.x | bash -
-      - run: 
-          name: Install Azure Functions Core Tools
-          command: npm i -g azure-functions-core-tools@core --unsafe-perm true
       - run:
           name: Login with Azure Service Principal
           command: az login --service_principal -u $SERVICE_PRINCIPAL_USER -p $SERVICE_PRINCIPAL_PASSWORD --tenant $SERVICE_PRINCIPAL_TENANT
       - run: 
           name: Publish Test App Service
-          command: cd functions/bin/Debug/netstandard2.0 && func azure functionapp publish $FUNCTION_APP_TEST
+          command: az webapp deployment source config-zip --name $FUNCTION_APP_TEST --resource-group $FUNCTION_APP_TEST_RESOURCE_GROUP --src functions/bin/Debug/netstandard2.0/publish.zip
 # Job orchestration
 workflows:
   version: 2
@@ -95,12 +95,12 @@ workflows:
   # Publish the style guide on successful build/test of master.
   build-test-and-publish:
     jobs:
-#      - build_test_functions:
-#          filters: *filter-ignore-gh-pages
-#      - build_test_spa:
-#          filters: *filter-ignore-gh-pages
+      - build_test_spa:
+          filters: *filter-ignore-gh-pages
+      - build_test_functions:
+          requires:
+            - build_test_spa
       - publish_to_test:
-#          requires:
-#            - build_test_functions
-#            - build_test_spa
+          requires:
+            - build_test_functions
           context: azfun-fsharp
