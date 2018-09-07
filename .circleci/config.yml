@@ -27,14 +27,31 @@ aliases:
 # Job definitions. Job execution is orchestrated in the 'workflows' section.
 jobs:
   # Build and test the components
-  build_test_spa:
+  build_test_functions:
     docker:
-      - image: circleci/node:8
+      - image: microsoft/dotnet:2.1-sdk
     steps:
       - run:
           name: Create workspace
           command: mkdir -p /tmp/workspace
       - checkout 
+      - run: 
+          name: Build functions
+          command: cd functions && dotnet build
+      - run:
+          name: Save functions package to workspace
+          command: cp -a functions/bin/Debug/netstandard2.0/. /tmp/workspace/publish/
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - publish
+  build_test_spa:
+    docker:
+      - image: circleci/node:8
+    steps:
+      - checkout 
+      - attach_workspace:
+          at: /tmp/workspace
       - restore_cache: *restore-node-modules
       - run: 
           name: Install app packages
@@ -48,48 +65,20 @@ jobs:
           command: cd app && yarn test -w 1 --coverage
       - run: 
           name: Save compiled SPA to workspace
-          command: cp -a app/build/. /tmp/workspace/spa/
-      - run: which zip
-      - run: zip --version
+          command: cp -a app/build/. /tmp/workspace/publish/spa/
+      - run: 
+          name: Zip publish folder
+          command: cd /tmp/workspace/publish && zip publish.zip ./*
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
-            - spa
-  build_test_functions:
-    docker:
-      - image: microsoft/dotnet:2.1-sdk
-    steps:
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          name: Install dotnet-zip tool
-          command: dotnet add package dotnet-zip
-      - checkout 
-      - run: 
-          name: Bundle SPA assets with functions
-          command: cp -a /tmp/workspace/spa/. ./functions/spa/
-      - run: 
-          name: Build functions
-          command: cd functions && dotnet build
-      #- run:
-      #    name: Create functions package
-      #    command: cp functions && dotnet zip --framework netstandard2.0 --runtime any
-      - run:
-          name: Save functions package to workspace
-          command: cp -a functions/bin/Debug/netstandard2.0/. /tmp/workspace/publish/
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - publish
+            - publish/publish.zip
   publish_to_test:
     docker:
       - image: microsoft/azure-cli
     steps:
       - attach_workspace:
           at: /tmp/workspace
-      - run: 
-          name: Zip publish folder
-          command: cd /tmp/workspace/publish && zip publish.zip ./*
       - run:
           name: Login with Azure Service Principal
           command: az login --service_principal -u $SERVICE_PRINCIPAL_USER -p $SERVICE_PRINCIPAL_PASSWORD --tenant $SERVICE_PRINCIPAL_TENANT
@@ -103,12 +92,12 @@ workflows:
   # Publish the style guide on successful build/test of master.
   build-test-and-publish:
     jobs:
-      - build_test_spa:
-          filters: *filter-ignore-gh-pages
       - build_test_functions:
-          requires:
-            - build_test_spa
-      - publish_to_test:
+          filters: *filter-ignore-gh-pages
+      - build_test_spa:
           requires:
             - build_test_functions
+      - publish_to_test:
+          requires:
+            - build_test_spa
           context: azfun-fsharp
