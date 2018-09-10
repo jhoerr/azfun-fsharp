@@ -1,23 +1,14 @@
 import * as React from 'react';
-import './App.css';
+import { Route, Switch } from 'react-router-dom';
+import Home from './components/Home';
+import Page from './components/layout/Page';
 
-import logo from './logo.svg';
-
-class App extends React.Component {
-  public render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <p>This version was definitely deployed by CI. Hooray!</p>
-      </div>
-    );
-  }
-}
+const App : React.SFC = () => (
+  <Page>
+    <Switch>
+      <Route path="/" exact={true} component={Home} />
+    </Switch>
+  </Page>
+)
 
 export default App;

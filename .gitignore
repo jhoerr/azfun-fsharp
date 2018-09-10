@@ -331,3 +331,4 @@ ASALocalRun/
 
 # static_files folder
 functions/spa/
+.DS_Store
