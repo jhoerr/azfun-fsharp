@@ -12,12 +12,12 @@ function* handleSignIn() {
     const state = yield select();
     console.log("handleSignIn with state", state)
     // To call async functions, use redux-saga's `call()`.
-    const res = yield call(callApi, 'get', API_ENDPOINT, `/ping?code=${state.auth.data}`)
-
-    if (res.error) {
-      yield put(signInError(res.error))
+    const res = yield call(callApi, 'get', API_ENDPOINT, `/auth?code=${state.auth.data}`)
+    console.log("handleSignIn api response", res)
+    if (res.errors) {
+      yield put(signInError(res.errors))
     } else {
-      yield put(signInSuccess(res.token))
+      yield put(signInSuccess(res.access_token))
     }
   } catch (err) {
     if (err instanceof Error) {

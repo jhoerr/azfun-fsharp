@@ -9,6 +9,7 @@
   </ItemGroup>
    <ItemGroup>
     <Compile Include="Common.fs" />
+    <Compile Include="Auth.fs" />
     <Compile Include="Hello.fs" />
     <Compile Include="Asset.fs" />
     <Compile Include="Ping.fs" />

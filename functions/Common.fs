@@ -21,7 +21,7 @@ module Common =
     type Status = HttpStatusCode
 
     type ErrorModel = {
-        Errors: array<string>
+        errors: array<string>
     }
 
     // UTILITY FUNCTIONS
@@ -64,6 +64,15 @@ module Common =
         | null -> fail (Status.BadRequest, "Expected a request body but received nothing")
         | ""   -> fail (Status.BadRequest, "Expected a request body but received nothing")
         | _    -> tryf Status.BadRequest (fun () -> body |> JsonConvert.DeserializeObject<'T>) 
+
+    /// <summary>
+    /// Attempt to retrieve a parameter of the given name from the query string
+    /// </summary>
+    let getQueryParam paramName (req: HttpRequest) =
+        if req.Query.ContainsKey paramName
+        then ok (req.Query.[paramName].ToString())
+        else fail (Status.BadRequest,  (sprintf "Expected query string parameter: %s" paramName))
+
 
     // HTTP RESPONSE
 
@@ -137,7 +146,7 @@ module Common =
             l 
             |> Seq.map snd 
             |> Seq.toArray 
-            |> (fun es -> { Errors = es } )
+            |> (fun es -> { errors = es } )
         
         ( statusCode, errors )
 

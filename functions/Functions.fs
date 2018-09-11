@@ -3,11 +3,19 @@ namespace MyFunctions
 open Microsoft.Azure.WebJobs
 open Microsoft.AspNetCore.Http
 open Microsoft.Azure.WebJobs.Host
+open Microsoft.Extensions.Configuration
 
 ///<summary>
 /// This module defines the bindings and triggers for all functions in the project
 ///</summary
 module Functions =
+
+    let config (context:ExecutionContext) = 
+        ConfigurationBuilder()
+            .SetBasePath(context.FunctionAppDirectory)
+            .AddJsonFile("local.settings.json", optional=true, reloadOnChange= true)
+            .AddEnvironmentVariables()
+            .Build();
 
     let getResponse fn = fn()
 
@@ -31,3 +39,11 @@ module Functions =
         req: HttpRequest,
         log: TraceWriter) =
             Asset.run req log |> getResponse
+
+    [<FunctionName("Auth")>]
+    let auth
+        ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "auth")>]
+        req: HttpRequest,
+        log: TraceWriter,
+        context: ExecutionContext) =
+            context |> config |> Auth.run req log |> getResponse
