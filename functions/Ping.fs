@@ -10,12 +10,16 @@ open Microsoft.Azure.WebJobs.Host
 /// It demonstrates a basic GET request and response.
 ///</summary>
 module Ping =
-        
+    
+    type ResponseModel = {
+        token: string
+    }
+
     /// <summary>
     /// Send a friendly hello message to the client
     /// </summary>
     let sayHello req = 
-        "Pong!" |> stringResponse Status.OK
+        {token = "Pong!"} |> jsonResponse Status.OK
 
     /// <summary>
     /// Say hello to a person by name.

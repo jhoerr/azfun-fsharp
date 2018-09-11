@@ -34,7 +34,6 @@
       "label": "build functions",
       "command": "dotnet build",
       "type": "shell",
-      "dependsOn": "build spa",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -73,10 +72,10 @@
       "problemMatcher": "$msCompile"
     },
     {
-      "label": "run",
+      "label": "start functions",
       "identifier": "runFunctionsHost",
       "type": "shell",
-      "dependsOn": ["build spa", "build functions"],
+      "dependsOn": "build functions",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -84,12 +83,31 @@
       "options": {
         "cwd": "${workspaceFolder}/functions/bin/Debug/netstandard2.0"
       },
-      "command": "cp -a ../../../../app/build/. ./spa && func host start",
+      "command": "func host start",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "start spa",
+      "identifier": "runSpaHost",
+      "type": "shell",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/app"
+      },
+      "command": "yarn start",
       "isBackground": true,
       "presentation": {
         "reveal": "always"
       },
       "problemMatcher": []
     }
+
   ]
 }

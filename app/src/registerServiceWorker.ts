@@ -20,6 +20,10 @@ const isLocalhost = Boolean(
 );
 
 export default function register() {
+  unregister()
+  console.log("not registering service worker...")
+  return;
+
   if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
     // The URL constructor is available in all browsers that support SW.
     const publicUrl = new URL(

@@ -2,19 +2,13 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { applyMiddleware, createStore } from 'redux';
-import loggingMiddleware from 'redux-logger';
 
 import 'rivet-uits/css/rivet.min.css';
 import App from './App';
-import reducer from './store';
+import configureStore from './configureStore'
  
-const middleware = applyMiddleware(
-  loggingMiddleware
-  // thunkMiddleware
-);
-const defaultState = {};
-const store = createStore(reducer, defaultState, middleware);
+const initialState = { auth : { loading: false, data: "", errors: undefined } }
+const store = configureStore(initialState)
 
 ReactDOM.render(
   <Provider store={store}>
