@@ -67,8 +67,8 @@ module Auth =
         let createTokenRequest = createTokenRequest clientId clientSecret redirectUrl
         let exchangeCodeForToken = exchangeCodeForToken log tokenUrl
 
-        (fun () -> req)
-        >> fromQueryString
-        >> bind createTokenRequest
-        >> bind exchangeCodeForToken
-        >> constructResponse returnToken log
+        req
+        |> fromQueryString
+        |> bind createTokenRequest
+        |> bind exchangeCodeForToken
+        |> constructResponse returnToken log

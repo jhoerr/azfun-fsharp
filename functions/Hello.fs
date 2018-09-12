@@ -39,7 +39,7 @@ module Hello =
     /// Say hello to a person by name.
     /// </summary>
     let run (req: HttpRequest) (log: TraceWriter) =
-        (fun () -> req)
-        >> deserializeBody<RequestModel>
-        >> bind validateInput
-        >> constructResponse sayHello log
+        req
+        |> deserializeBody<RequestModel>
+        |> bind validateInput
+        |> constructResponse sayHello log

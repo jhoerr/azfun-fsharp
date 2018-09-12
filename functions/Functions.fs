@@ -17,28 +17,26 @@ module Functions =
             .AddEnvironmentVariables()
             .Build();
 
-    let getResponse fn = fn()
-
     [<FunctionName("Ping")>]
     let ping
         ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "ping")>]
         req: HttpRequest,
         log: TraceWriter) =
-            Ping.run req log |> getResponse
+            Ping.run req log
 
     [<FunctionName("Hello")>]
     let helloYou
         ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "post", Route = "hello")>]
         req: HttpRequest,
         log: TraceWriter) =
-            Hello.run req log |> getResponse
+            Hello.run req log
 
     [<FunctionName("Asset")>]
     let assetFiles
         ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "asset/{path}")>]
         req: HttpRequest,
         log: TraceWriter) =
-            Asset.run req log |> getResponse
+            Asset.run req log
 
     [<FunctionName("Auth")>]
     let auth
@@ -46,4 +44,4 @@ module Functions =
         req: HttpRequest,
         log: TraceWriter,
         context: ExecutionContext) =
-            context |> config |> Auth.run req log |> getResponse
+            context |> config |> Auth.run req log

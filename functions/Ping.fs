@@ -25,5 +25,5 @@ module Ping =
     /// Say hello to a person by name.
     /// </summary>
     let run (req: HttpRequest) (log: TraceWriter) =
-        (fun () -> ok req)
-        >> constructResponse sayHello log
+        ok req
+        |> constructResponse sayHello log

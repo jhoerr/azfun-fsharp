@@ -57,6 +57,6 @@ module Asset =
     /// Returns a file from the file system. Best used for static assets.
     ///</summary>
     let run (req: HttpRequest) (log: TraceWriter) =
-        (fun () -> req)
-        >> resolveFilePath log
-        >> constructResponse sendFile log
+        req
+        |> resolveFilePath log
+        |> constructResponse sendFile log
