@@ -51,7 +51,7 @@ module Asset =
     /// Send the file to the client.
     ///</summary> 
     let sendFile path =
-        path |> fileResponse Status.OK 
+        path |> fileResponse Status.OK |> ok
 
     ///<summary>
     /// Returns a file from the file system. Best used for static assets.
@@ -59,4 +59,5 @@ module Asset =
     let run (req: HttpRequest) (log: TraceWriter) =
         req
         |> resolveFilePath log
-        |> constructResponse sendFile log
+        |> bind sendFile
+        |> constructResponse log

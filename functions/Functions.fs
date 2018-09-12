@@ -1,5 +1,6 @@
 namespace MyFunctions
 
+open Chessie.ErrorHandling
 open Microsoft.Azure.WebJobs
 open Microsoft.AspNetCore.Http
 open Microsoft.Azure.WebJobs.Host
@@ -22,7 +23,7 @@ module Functions =
         ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "ping")>]
         req: HttpRequest,
         log: TraceWriter) =
-            Ping.run req log
+            Ping.run req log |> Async.StartAsTask
 
     [<FunctionName("Hello")>]
     let helloYou
@@ -44,4 +45,4 @@ module Functions =
         req: HttpRequest,
         log: TraceWriter,
         context: ExecutionContext) =
-            context |> config |> Auth.run req log
+            context |> config |> Auth.run req log |> Async.StartAsTask

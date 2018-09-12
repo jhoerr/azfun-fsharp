@@ -33,7 +33,8 @@ module Hello =
     /// </summary>
     let sayHello model = 
         { Message = sprintf "Hello, %s %s" model.FirstName model.LastName }
-        |> jsonResponse Status.OK
+        |> jsonResponse Status.OK 
+        |> ok
 
     /// <summary>
     /// Say hello to a person by name.
@@ -42,4 +43,5 @@ module Hello =
         req
         |> deserializeBody<RequestModel>
         |> bind validateInput
-        |> constructResponse sayHello log
+        |> bind sayHello
+        |> constructResponse log

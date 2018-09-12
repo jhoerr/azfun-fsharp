@@ -7,7 +7,6 @@ open Microsoft.Azure.WebJobs.Host
 open System.Net.Http
 open System.Collections.Generic
 open Newtonsoft.Json
-open Newtonsoft.Json
 open Microsoft.Extensions.Configuration
 
 ///<summary>
@@ -16,7 +15,6 @@ open Microsoft.Extensions.Configuration
 ///</summary>
 module Auth =
     
-    let client = new HttpClient()
 
     type ResponseModel = {
         access_token: string
@@ -35,40 +33,26 @@ module Auth =
             |> (fun d-> new FormUrlEncodedContent(d))
         tryf Status.InternalServerError fn
     
-    let exchangeCodeForToken (log: TraceWriter) (oauthTokenUrl: string) (tokenRequest: FormUrlEncodedContent) =
-        let fn () = 
-            client.PostAsync(oauthTokenUrl, tokenRequest) 
-            |> Async.AwaitTask 
-            |> Async.RunSynchronously
-            |> (fun resp -> resp.Content.ReadAsStringAsync())
-            |> Async.AwaitTask
-            |> Async.RunSynchronously
-            // TODO -- add some error handling to deal with failed UAA request { "error":"...", "error_description":"..."}
-            |> JsonConvert.DeserializeObject<ResponseModel>
-        tryf Status.InternalServerError fn      
-
-    /// <summary>
-    /// Send a friendly hello message to the client
-    /// </summary>
     let returnToken token = 
-        token |> jsonResponse Status.OK
+        tryf Status.InternalServerError (fun () -> token |> jsonResponse Status.OK)
 
-    /// <summary>
-    /// Say hello to a person by name.
-    /// </summary>
-    let run (req: HttpRequest) (log: TraceWriter) (config:IConfigurationRoot)  =
-        
+    let workflow (req: HttpRequest) (log: TraceWriter) (config:IConfigurationRoot) = asyncTrial {
         let clientId = config.["OauthClientId"]
         let clientSecret = config.["OauthClientSecret"]
         let tokenUrl = config.["OauthTokenUrl"]
         let redirectUrl = config.["OauthRedirectUrl"]
+        
+        let! code = getQueryParam "code" req
+        let! request = createTokenRequest clientId clientSecret redirectUrl code
+        let! response = postAsync<ResponseModel> tokenUrl request
+        let! token = bind returnToken response         
+        return token
+    }
 
-        let fromQueryString = getQueryParam "code"
-        let createTokenRequest = createTokenRequest clientId clientSecret redirectUrl
-        let exchangeCodeForToken = exchangeCodeForToken log tokenUrl
-
-        req
-        |> fromQueryString
-        |> bind createTokenRequest
-        |> bind exchangeCodeForToken
-        |> constructResponse returnToken log
+    /// <summary>
+    /// Say hello to a person by name.
+    /// </summary>
+    let run (req: HttpRequest) (log: TraceWriter) (config:IConfigurationRoot) = async {
+        let! result = workflow req log config |> Async.ofAsyncResult
+        return constructResponse log result
+    }

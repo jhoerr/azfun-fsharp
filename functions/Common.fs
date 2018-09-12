@@ -16,6 +16,9 @@ open System.Net.Http.Headers
 ///</summary>
 module Common =
 
+    // STATIC 
+    let client = new HttpClient()
+
     // TYPES
 
     type Status = HttpStatusCode
@@ -54,6 +57,9 @@ module Common =
 
     // HTTP REQUEST
 
+    let tryDeserialize<'T> status str =
+        tryf status (fun () -> str |> JsonConvert.DeserializeObject<'T>)
+
     /// <summary>
     /// Attempt to deserialize the request body as an object of the given type.
     /// </summary>
@@ -63,7 +69,7 @@ module Common =
         match body with
         | null -> fail (Status.BadRequest, "Expected a request body but received nothing")
         | ""   -> fail (Status.BadRequest, "Expected a request body but received nothing")
-        | _    -> tryf Status.BadRequest (fun () -> body |> JsonConvert.DeserializeObject<'T>) 
+        | _    -> tryDeserialize<'T> Status.BadRequest body 
 
     /// <summary>
     /// Attempt to retrieve a parameter of the given name from the query string
@@ -73,6 +79,16 @@ module Common =
         then ok (req.Query.[paramName].ToString())
         else fail (Status.BadRequest,  (sprintf "Expected query string parameter: %s" paramName))
 
+    let postAsync<'T> (url:string) (content:HttpContent) = async {
+        try
+            let! response = client.PostAsync(url, content) |> Async.AwaitTask
+            let! content = response.Content.ReadAsStringAsync() |> Async.AwaitTask
+            if (response.IsSuccessStatusCode)
+            then return tryDeserialize Status.InternalServerError content
+            else return fail (response.StatusCode, content)
+        with 
+        | exn -> return fail (Status.InternalServerError, exn.Message)
+    }
 
     // HTTP RESPONSE
 
@@ -156,10 +172,9 @@ module Common =
     /// The result(s) of a failed trial will be aggregated, logged, and returned as a 
     /// JSON error message with an appropriate status code.
     /// </summary>
-    let constructResponse success (log:TraceWriter) trialResult : HttpResponseMessage =
+    let constructResponse (log:TraceWriter) trialResult : HttpResponseMessage =
         match trialResult with
-        | Ok(result, _) -> 
-            success result
+        | Ok(result, _) -> result
         | Bad(msgs) -> 
             let (status, errors) = failure (msgs)
             sprintf "%A %O" status errors |> log.Error
