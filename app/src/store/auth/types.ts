@@ -11,13 +11,20 @@ export const enum AuthActionTypes {
     SIGN_OUT = '@@auth/SIGN_OUT',
 }
 
-// Declare state types with `readonly` modifier to get compile time immutability.
-// https://github.com/piotrwitek/react-redux-typescript-guide#state-with-type-level-immutability
-interface IApiState<T> {
-    readonly loading: boolean
-    readonly data: T
-    readonly errors?: string
+export interface IAuthUser {
+    user_name: string,
+    user_role: string
 }
 
-// The User's UAA JWT 
-export interface IAuthState extends IApiState<string> { }
+// Declare state types with `readonly` modifier to get compile time immutability.
+// https://github.com/piotrwitek/react-redux-typescript-guide#state-with-type-level-immutability
+interface IApiState {
+    readonly loading: boolean
+    readonly error?: string
+}
+
+// The name of the authorized user
+export interface IAuthState extends IApiState { 
+    readonly code?: string
+    readonly user?: IAuthUser
+}

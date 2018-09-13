@@ -2,11 +2,11 @@ namespace MyFunctions
 
 open Chessie.ErrorHandling
 open Common
+open JwtUtil
 open Microsoft.AspNetCore.Http
 open Microsoft.Azure.WebJobs.Host
 open System.Net.Http
 open System.Collections.Generic
-open Newtonsoft.Json
 open Microsoft.Extensions.Configuration
 
 ///<summary>
@@ -15,6 +15,7 @@ open Microsoft.Extensions.Configuration
 ///</summary>
 module Auth =
     
+    let inline (!>) f g x = g(f x)
 
     type ResponseModel = {
         access_token: string
@@ -32,27 +33,36 @@ module Auth =
             |> Dictionary
             |> (fun d-> new FormUrlEncodedContent(d))
         tryf Status.InternalServerError fn
-    
-    let returnToken token = 
-        tryf Status.InternalServerError (fun () -> token |> jsonResponse Status.OK)
 
-    let workflow (req: HttpRequest) (log: TraceWriter) (config:IConfigurationRoot) = asyncTrial {
-        let clientId = config.["OauthClientId"]
-        let clientSecret = config.["OauthClientSecret"]
-        let tokenUrl = config.["OauthTokenUrl"]
-        let redirectUrl = config.["OauthRedirectUrl"]
-        
-        let! code = getQueryParam "code" req
-        let! request = createTokenRequest clientId clientSecret redirectUrl code
-        let! response = postAsync<ResponseModel> tokenUrl request
-        let! token = bind returnToken response         
-        return token
+    let getAppRole username = async {
+        let! role = async.Return (ok "role")
+        return role
+    }
+
+    let returnToken token = 
+        let fn() = 
+            { access_token = token } 
+            |> jsonResponse Status.OK
+        tryf Status.InternalServerError fn
+    
+    let workflow (req: HttpRequest) config = asyncTrial {
+        let getUaaJwt request = bindAsyncResult (fun () -> postAsync<ResponseModel> config.OAuth2TokenUrl request)
+        let getAppRole username = bindAsyncResult (fun () -> getAppRole username)
+
+        let! oauthCode = getQueryParam "code" req
+        let! uaaRequest = createTokenRequest config.OAuth2ClientId config.OAuth2ClientSecret config.OAuth2RedirectUrl oauthCode
+        let! uaaJwt = getUaaJwt uaaRequest
+        let! uaaClaims = decodeUaaJwt uaaJwt.access_token
+        let! appRole = getAppRole uaaClaims.UserName
+        let! appJwt = encodeJwt config.JwtSecret uaaClaims.Expiration uaaClaims.UserName appRole
+        let! response = returnToken appJwt         
+        return response
     }
 
     /// <summary>
     /// Say hello to a person by name.
     /// </summary>
-    let run (req: HttpRequest) (log: TraceWriter) (config:IConfigurationRoot) = async {
-        let! result = workflow req log config |> Async.ofAsyncResult
+    let run (req: HttpRequest) (log: TraceWriter) config = async {
+        let! result = workflow req config |> Async.ofAsyncResult
         return constructResponse log result
     }

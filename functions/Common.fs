@@ -9,6 +9,7 @@ open Newtonsoft.Json
 open System.Net
 open System.Net.Http
 open System.Net.Http.Headers
+open System.Net
 
 ///<summary>
 /// This module contains common types and functions to facilitate request 
@@ -25,6 +26,14 @@ module Common =
 
     type ErrorModel = {
         errors: array<string>
+    }
+
+    type AppConfig = {
+        OAuth2ClientId: string
+        OAuth2ClientSecret: string
+        OAuth2TokenUrl: string
+        OAuth2RedirectUrl: string
+        JwtSecret: string
     }
 
     // UTILITY FUNCTIONS
@@ -55,6 +64,17 @@ module Common =
         with
         | exn -> fail (status, exn.Message)
 
+    /// <summary>
+    /// ROP: Attempt to execute a function.
+    /// If it succeeds, pass along the result. 
+    /// If it throws, wrap the exception message in a failure with the provided status.
+    /// </summary>
+    let tryf' status msg fn = 
+        try
+            fn() |> ok
+        with
+        | exn -> fail (status, sprintf "%s: %s" msg (exn.Message))
+
     // HTTP REQUEST
 
     let tryDeserialize<'T> status str =
@@ -79,7 +99,7 @@ module Common =
         then ok (req.Query.[paramName].ToString())
         else fail (Status.BadRequest,  (sprintf "Expected query string parameter: %s" paramName))
 
-    let postAsync<'T> (url:string) (content:HttpContent) = async {
+    let postAsync<'T> (url:string) (content:HttpContent) : Async<Result<'T,(HttpStatusCode*string)>> = async {
         try
             let! response = client.PostAsync(url, content) |> Async.AwaitTask
             let! content = response.Content.ReadAsStringAsync() |> Async.AwaitTask
@@ -89,6 +109,11 @@ module Common =
         with 
         | exn -> return fail (Status.InternalServerError, exn.Message)
     }
+
+    // JWT
+
+
+
 
     // HTTP RESPONSE
 
@@ -179,3 +204,14 @@ module Common =
             let (status, errors) = failure (msgs)
             sprintf "%A %O" status errors |> log.Error
             jsonResponse status errors
+
+
+    /// <summary>
+    /// Given an async computation expression that returns a Result<TSuccess,TFailure>,
+    /// bind and return the TSuccess.
+    /// </summary>
+    let bindAsyncResult<'T> (asyncFn: unit -> Async<Result<'T,(HttpStatusCode*string)>>) = asyncTrial {
+        let! result = asyncFn()
+        let! bound = result
+        return bound
+    }

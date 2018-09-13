@@ -3,9 +3,10 @@ import { AuthActionTypes, IAuthState } from './types'
 
 // Type-safe initialState!
 const initialState: IAuthState = {
-  data: "",
-  errors: undefined,
-  loading: false
+  code: undefined,
+  error: undefined,
+  loading: false,
+  user: undefined
 }
 
 // Thanks to Redux 4's much simpler typings, we can take away a lot of typings on the reducer side,
@@ -13,16 +14,16 @@ const initialState: IAuthState = {
 const reducer: Reducer<IAuthState> = (state = initialState, action) => {
   switch (action.type) {
     case AuthActionTypes.SIGN_IN: {
-      return { ...state, loading: true, data: action.payload }
+      return { ...state, code: action.payload, loading: true, user: undefined }
     }
     case AuthActionTypes.SIGN_IN_SUCCESS: {
-      return { ...state, loading: false, data: action.payload }
+      return { ...state, code: undefined, loading: false, user: action.payload }
     }
     case AuthActionTypes.SIGN_IN_ERROR: {
-      return { ...state, loading: false, data:"", errors: action.payload }
+      return { ...state, code: undefined, loading: false, user: undefined, error: action.payload }
     }
     case AuthActionTypes.SIGN_OUT: {
-        return { ...state, data: "" }
+        return { ...state, user: undefined }
     }
     default: {
       return state

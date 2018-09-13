@@ -1,5 +1,6 @@
 namespace MyFunctions
 
+open Common
 open Chessie.ErrorHandling
 open Microsoft.Azure.WebJobs
 open Microsoft.AspNetCore.Http
@@ -11,12 +12,20 @@ open Microsoft.Extensions.Configuration
 ///</summary
 module Functions =
 
-    let config (context:ExecutionContext) = 
-        ConfigurationBuilder()
-            .SetBasePath(context.FunctionAppDirectory)
-            .AddJsonFile("local.settings.json", optional=true, reloadOnChange= true)
-            .AddEnvironmentVariables()
-            .Build();
+    let appConfig (context:ExecutionContext) = 
+        let config = 
+            ConfigurationBuilder()
+                .SetBasePath(context.FunctionAppDirectory)
+                .AddJsonFile("local.settings.json", optional=true, reloadOnChange= true)
+                .AddEnvironmentVariables()
+                .Build();
+        {
+            OAuth2ClientId = config.["OAuthClientId"]
+            OAuth2ClientSecret = config.["OAuthClientSecret"]
+            OAuth2TokenUrl = config.["OAuthTokenUrl"]
+            OAuth2RedirectUrl = config.["OAuthRedirectUrl"]
+            JwtSecret = config.["JwtSecret"]
+        }
 
     [<FunctionName("Ping")>]
     let ping
@@ -45,4 +54,4 @@ module Functions =
         req: HttpRequest,
         log: TraceWriter,
         context: ExecutionContext) =
-            context |> config |> Auth.run req log |> Async.StartAsTask
+            context |> appConfig |> Auth.run req log |> Async.StartAsTask

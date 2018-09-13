@@ -1,25 +1,29 @@
+import * as JWT from 'jwt-decode'
+import { push } from 'react-router-redux';
 import { all, call, fork, put, select, takeEvery } from 'redux-saga/effects'
 import { callApi } from '../common'
+import { clearAuthToken, setAuthToken } from '../effects'
 import { signInError, signInSuccess } from './actions'
-import { AuthActionTypes   } from './types'
+import { AuthActionTypes, IAuthUser } from './types'
 
 const API_ENDPOINT = process.env.REACT_APP_API_URL || ''
 
 function* handleSignIn() {
   try {
-    console.log("handleSignIn...")
-    // Get current action state
     const state = yield select();
-    console.log("handleSignIn with state", state)
-    // To call async functions, use redux-saga's `call()`.
-    const res = yield call(callApi, 'get', API_ENDPOINT, `/auth?code=${state.auth.data}`)
-    console.log("handleSignIn api response", res)
+
+    const res = yield call(callApi, 'get', API_ENDPOINT, `/auth?code=${state.auth.code}`)
+
     if (res.errors) {
+      yield call(clearAuthToken)
       yield put(signInError(res.errors))
     } else {
-      yield put(signInSuccess(res.access_token))
+      yield call(setAuthToken, res.access_token)
+      yield put(signInSuccess(JWT<IAuthUser>(res.access_token)))
+      yield put(push('/'))
     }
   } catch (err) {
+    yield call(clearAuthToken)
     if (err instanceof Error) {
       yield put(signInError(err.stack!))
     } else {
@@ -31,7 +35,6 @@ function* handleSignIn() {
 // This is our watcher function. We use `take*()` functions to watch Redux for a specific action
 // type, and run our saga, for example the `handleFetch()` saga above.
 function* watchSignIn() {
-  console.log("watchSignIn...")
   yield takeEvery(AuthActionTypes.SIGN_IN, handleSignIn)
 }
 

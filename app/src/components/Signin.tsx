@@ -30,13 +30,17 @@ class Signin extends React.Component<IAuthState & ISigninProps & IPropsFromDispa
     public render () {
         return (
             <>
-                { this.props.loading && 
+                { this.props.loading &&
                   <p>Signing in...</p> }
-                { !this.props.loading && 
+                { !this.props.loading && this.props.user &&
                   <div>
-                    <p>Data: {this.props.data}</p>
-                    <p>Errors: {this.props.errors}</p> 
-                  </div>}
+                    <p>Username: {this.props.user.user_name} </p>
+                    <p>Role: {this.props.user.user_role} </p>
+                  </div> }
+                { !this.props.loading && this.props.error &&
+                  <div>
+                    <p>Errors: {this.props.error}</p> 
+                  </div> }
             </>
         )
     };
@@ -46,9 +50,9 @@ class Signin extends React.Component<IAuthState & ISigninProps & IPropsFromDispa
 // Although if necessary, you can always include multiple contexts. Just make sure to
 // separate them from each other to prevent prop conflicts.
 const mapStateToProps = ({ auth }: IApplicationState) => ({
-    data: auth.data,
-    errors: auth.errors,
-    loading: auth.loading
+    error: auth.error,
+    loading: auth.loading,
+    user: auth.user,
   })
   
   // mapDispatchToProps is especially useful for constraining our actions to the connected component.

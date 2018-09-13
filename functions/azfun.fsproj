@@ -6,9 +6,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.19" />
     <PackageReference Include="Chessie" Version="0.6.0" />
+    <PackageReference Include="JWT" Version="4.0.0" />
   </ItemGroup>
    <ItemGroup>
     <Compile Include="Common.fs" />
+    <Compile Include="JwtUtil.fs" />
     <Compile Include="Auth.fs" />
     <Compile Include="Hello.fs" />
     <Compile Include="Asset.fs" />

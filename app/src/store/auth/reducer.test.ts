@@ -24,6 +24,6 @@ it("reduces the success in request", () => {
         loading: false,
     }
 
-    expect(authReducer(startingState, actions.signInSuccess("token")))
+    expect(authReducer(startingState, actions.signInSuccess({user_name: "johndoe", user_role: "admin"})))
         .toEqual(expectedState)
 });
