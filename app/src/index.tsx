@@ -8,14 +8,8 @@ import 'rivet-uits/css/rivet.min.css';
 import App from './App';
 import configureStore from './configureStore'
  
-const initialState = { auth : {
-  code: undefined,
-  error: undefined,
-  loading: false,
-  user: undefined
-} }
 const history = createBrowserHistory()
-const store = configureStore(initialState, history)
+const store = configureStore(history)
 
 ReactDOM.render(
   <Provider store={store}>

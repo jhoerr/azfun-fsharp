@@ -1,13 +1,17 @@
 import { Action, AnyAction, combineReducers, Dispatch } from 'redux'
 import { all, fork } from 'redux-saga/effects'
 
-import { authReducer } from './auth/reducer'
+import { authReducer, initialAuthState } from './auth/reducer'
 import authSaga from './auth/saga'
 import { IAuthState } from './auth/types'
 
 // The top-level state object
 export interface IApplicationState {
   auth: IAuthState
+}
+
+export const initialState : IApplicationState = {
+  auth: initialAuthState
 }
 
 // Additional props for connected React components. This prop is passed by default with `connect()`
