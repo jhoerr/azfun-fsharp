@@ -1,3 +1,5 @@
+import { IApiState } from '../common'
+
 // Use `const enum`s for better autocompletion of action type names. These will
 // be compiled away leaving only the final value in your compiled code.
 //
@@ -16,15 +18,8 @@ export interface IAuthUser {
     user_role: string
 }
 
-// Declare state types with `readonly` modifier to get compile time immutability.
-// https://github.com/piotrwitek/react-redux-typescript-guide#state-with-type-level-immutability
-interface IApiState {
-    readonly loading: boolean
-    readonly error?: string
-}
-
 // The name of the authorized user
-export interface IAuthState extends IApiState { 
+export interface IAuthState extends IApiState<IAuthUser> { 
     readonly code?: string
     readonly user?: IAuthUser
 }

@@ -1,15 +1,37 @@
-const callApi = (method: string, url: string, path: string, auth?: string, data?: any) => {
-    return fetch(url + '/api' + path, {
-        body: JSON.stringify(data),
-        headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${auth}`,
-            'Content-Type': 'application/json',
-        },
-        method,
-    }).then(res => res.json())
-  }
+import { AnyAction } from "redux";
 
-export {
-    callApi
+// TYPES
+
+// Declare state types with `readonly` modifier to get compile time immutability.
+// https://github.com/piotrwitek/react-redux-typescript-guide#state-with-type-level-immutability
+export interface IApiState<T> {
+    readonly data?: T
+    readonly error?: string
+    readonly loading: boolean
 }
+
+// REDUCERS
+
+export const FetchReducer = <T>(state:IApiState<T>, action:AnyAction) : IApiState<T> => (
+    { ...state, 
+        data: undefined,
+        error: undefined,
+        loading: true,
+    }
+)
+
+export const FetchSuccessReducer = <T>(state:IApiState<T>, action:AnyAction) : IApiState<T> => (
+    { ...state, 
+        data: action.payload,
+        error: undefined,
+        loading: false,
+    }
+)
+
+export const FetchErrorReducer = <T>(state:IApiState<T>, action:AnyAction) : IApiState<T> => (
+    { ...state, 
+        data: undefined,
+        error: action.payload,
+        loading: false,
+    }
+)

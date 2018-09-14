@@ -3,7 +3,8 @@ import { authReducer } from './reducer'
 
 it("reduces the sign in request", () => {
     const expectedState = {
-        data: "code",
+        code: "code",
+        data: undefined,
         errors: undefined,
         loading: true,
     }
@@ -14,16 +15,22 @@ it("reduces the sign in request", () => {
 
 it("reduces the success in request", () => {
     const startingState = {
-        data: "",
+        code: "code",
+        data: undefined,
         errors: undefined,
         loading: true,
     }
+    const user = {
+        user_name: "johndoe", 
+        user_role: "admin"
+    }
     const expectedState = {
-        data: "token",
+        code: undefined,
+        data: user,
         errors: undefined,
         loading: false,
     }
 
-    expect(authReducer(startingState, actions.signInSuccess({user_name: "johndoe", user_role: "admin"})))
+    expect(authReducer(startingState, actions.signInSuccess(user)))
         .toEqual(expectedState)
 });
