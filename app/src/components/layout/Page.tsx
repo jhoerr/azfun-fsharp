@@ -38,7 +38,7 @@ const Page: React.SFC<IPageProps & IPropsFromDispatch> = ({ auth, signOut, child
       }
       { !auth &&
         <HeaderNavigation>
-          <a href={`${process.env.REACT_APP_OAUTH2_AUTH_URL}?response_type=code&client_id=${process.env.REACT_APP_OAUTH2_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_WEB_URL}/signin`}>Sign In</a>
+          <a href={`${process.env.REACT_APP_OAUTH2_AUTH_URL}?response_type=code&client_id=${process.env.REACT_APP_OAUTH2_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_WEB_URL}/signin`}>Log In</a>
         </HeaderNavigation>
       }
     </Header>
