@@ -7,9 +7,13 @@ import { IApiState } from '../common'
 // personally, I use the `@@context/ACTION_TYPE` convention, to follow the convention
 // of Redux's `@@INIT` action.
 export const enum ProfileActionTypes {
-    PROFILE_FETCH = '@@profile/PROFILE_FETCH',
+    PROFILE_FETCH_REQUEST = '@@profile/PROFILE_FETCH_REQUEST',
     PROFILE_FETCH_SUCCESS = '@@profile/PROFILE_FETCH_SUCCESS',
     PROFILE_FETCH_ERROR = '@@profile/PROFILE_FETCH_ERROR',
+}
+
+export interface IProfileRequest {
+    username: string,
 }
 
 export interface IProfile {
@@ -19,5 +23,5 @@ export interface IProfile {
     expertise: string
 }
 
-export interface IProfileState extends IApiState<IProfile> { 
+export interface IProfileState extends IApiState<IProfileRequest, IProfile> { 
 }

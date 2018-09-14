@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@t7/render": "^0.0.5",
     "connected-react-router": "^4.4.1",
     "jwt-decode": "^2.2.0",
     "query-string": "^6.1.0",

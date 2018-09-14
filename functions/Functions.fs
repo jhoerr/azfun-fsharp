@@ -55,3 +55,12 @@ module Functions =
         log: TraceWriter,
         context: ExecutionContext) =
             context |> appConfig |> Auth.run req log |> Async.StartAsTask
+
+    [<FunctionName("Profile")>]
+    let profile
+        ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "profile/{username}")>]
+        req: HttpRequest,
+        log: TraceWriter,
+        context: ExecutionContext,
+        username: string) =
+            context |> appConfig |> Profile.run req log username |> Async.StartAsTask

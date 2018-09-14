@@ -7,10 +7,14 @@ import { IApiState } from '../common'
 // personally, I use the `@@context/ACTION_TYPE` convention, to follow the convention
 // of Redux's `@@INIT` action.
 export const enum AuthActionTypes {
-    SIGN_IN = '@@auth/SIGN_IN',
+    SIGN_IN_REQUEST = '@@auth/SIGN_IN',
     SIGN_IN_SUCCESS = '@@auth/SIGN_IN_SUCCESS',
     SIGN_IN_ERROR = '@@auth/SIGN_IN_ERROR',
     SIGN_OUT = '@@auth/SIGN_OUT',
+}
+
+export interface IAuthRequest {
+    code: string
 }
 
 export interface IAuthUser {
@@ -19,7 +23,4 @@ export interface IAuthUser {
 }
 
 // The name of the authorized user
-export interface IAuthState extends IApiState<IAuthUser> { 
-    readonly code?: string
-    readonly user?: IAuthUser
-}
+export interface IAuthState extends IApiState<IAuthRequest, IAuthUser> { }

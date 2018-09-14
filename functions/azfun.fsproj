@@ -11,10 +11,12 @@
    <ItemGroup>
     <Compile Include="Common.fs" />
     <Compile Include="JwtUtil.fs" />
+    <Compile Include="AuthUtil.fs" />
     <Compile Include="Auth.fs" />
     <Compile Include="Hello.fs" />
     <Compile Include="Asset.fs" />
     <Compile Include="Ping.fs" />
+    <Compile Include="Profile.fs" />
     <Compile Include="Functions.fs" />
   </ItemGroup>
   <ItemGroup>

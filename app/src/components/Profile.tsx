@@ -3,20 +3,22 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { List } from 'rivet-react';
 import { IApplicationState } from '../store';
-import { IApiState } from '../store/common';
 import { profileFetchRequest } from '../store/profile/actions';
-import { IProfile } from '../store/profile/types';
+import { IProfileRequest, IProfileState } from '../store/profile/types';
 import PageTitle from './layout/PageTitle';
 
+interface IProfileProps {
+    match: any
+}
 // We can use `typeof` here to map our dispatch types to the props, like so.
 interface IPropsFromDispatch {
     profileFetchRequest: typeof profileFetchRequest
 }
 
-class Profile extends React.Component<IApiState<IProfile> & IPropsFromDispatch>{
+class Profile extends React.Component<IProfileState & IProfileProps & IPropsFromDispatch>{
 
     public componentDidMount() {
-        this.props.profileFetchRequest()
+        this.props.profileFetchRequest({ username: this.props.match.params.username })
     }
 
     public render() {
@@ -53,7 +55,7 @@ const mapStateToProps = ({ profile }: IApplicationState) => ({
   // mapDispatchToProps is especially useful for constraining our actions to the connected component.
   // You can access these via `this.props`.
   const mapDispatchToProps = (dispatch: Dispatch) : IPropsFromDispatch => ({
-    profileFetchRequest: () => dispatch(profileFetchRequest())
+    profileFetchRequest: (request: IProfileRequest) => dispatch(profileFetchRequest(request))
   })
   
 // Now let's connect our component!

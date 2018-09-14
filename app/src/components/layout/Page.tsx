@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { connect } from 'react-redux'
-import { Link } from 'react-router-dom';
 import { Dispatch } from 'redux'
 import { Footer, Header, HeaderIdentity, HeaderMenu, HeaderNavigation } from 'rivet-react';
 import { IApplicationState  } from '../../store'
@@ -9,7 +8,7 @@ import { IAuthUser } from '../../store/auth/types';
 
 export interface IPageProps {
     children?: React.ReactNode
-    auth?: IAuthUser
+    user?: IAuthUser
 }
 
 // We can use `typeof` here to map our dispatch types to the props, like so.
@@ -17,10 +16,10 @@ interface IPropsFromDispatch {
   signOut: typeof signOutRequest
 }
 
-const Page: React.SFC<IPageProps & IPropsFromDispatch> = ({ auth, signOut, children }) => (
+const Page: React.SFC<IPageProps & IPropsFromDispatch> = ({ user, signOut, children }) => (
   <>
     <Header title="IT Pro Database">
-      { auth &&
+      { user &&
           <HeaderNavigation>
             <a href="#">Nav one</a>
             <HeaderMenu label="Nav two">
@@ -31,12 +30,12 @@ const Page: React.SFC<IPageProps & IPropsFromDispatch> = ({ auth, signOut, child
             </HeaderMenu>
           </HeaderNavigation>
       }
-      { auth &&
-          <HeaderIdentity username={auth.user_name} onLogout={signOut}>
-            <Link to="/profile">Profile</Link>
+      { user &&
+          <HeaderIdentity username={user.user_name} onLogout={signOut}>
+            <a href="/profile">Profile</a>
           </HeaderIdentity>
       }
-      { !auth &&
+      { !user &&
         <HeaderNavigation>
           <a href={`${process.env.REACT_APP_OAUTH2_AUTH_URL}?response_type=code&client_id=${process.env.REACT_APP_OAUTH2_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_WEB_URL}/signin`}>Log In</a>
         </HeaderNavigation>
@@ -53,7 +52,7 @@ const Page: React.SFC<IPageProps & IPropsFromDispatch> = ({ auth, signOut, child
 // Although if necessary, you can always include multiple contexts. Just make sure to
 // separate them from each other to prevent prop conflicts.
 const mapStateToProps = ({ auth }: IApplicationState) => ({
-  auth: auth.data
+  user: auth.data
 })
 
 // mapDispatchToProps is especially useful for constraining our actions to the connected component.

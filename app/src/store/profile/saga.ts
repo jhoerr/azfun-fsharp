@@ -1,9 +1,10 @@
-import { all, /* call, */ fork, put, takeEvery } from 'redux-saga/effects'
-// import { callApi } from '../effects'
+import { all, call, fork, put, select, takeEvery } from 'redux-saga/effects'
+import { callApiWithAuth } from '../effects'
+import { IApplicationState } from '../index';
 import { profileFetchError, profileFetchSuccess } from './actions'
-import { IProfile, ProfileActionTypes } from './types'
+import { IProfile, IProfileRequest, ProfileActionTypes } from './types'
 
-// const API_ENDPOINT = process.env.REACT_APP_API_URL || ''
+const API_ENDPOINT = process.env.REACT_APP_API_URL || ''
 
 const stubProfile : IProfile = {
     department: "UITS",
@@ -14,17 +15,16 @@ const stubProfile : IProfile = {
 
 function* handleFetch() {
   try {
-    console.log("Handling profile fetch...")
-    /*
-    const res = yield call(callApi, 'get', API_ENDPOINT, `/profile/me`)
-    if (res.errors) {
-      yield put(profileFetchError(res.errors))
+    const request = (yield select<IApplicationState>((s) => s.profile.request)) as IProfileRequest
+    const response = yield call(callApiWithAuth, 'get', API_ENDPOINT, `/profile/${request.username}`)
+    console.log ("in try block", response)
+    if (response.errors) {
+      yield put(profileFetchError(response.errors))
     } else {
-      yield put(profileFetchSuccess(res.data))
+      yield put(profileFetchSuccess(stubProfile))
     }
-    */
-    yield put(profileFetchSuccess(stubProfile))
   } catch (err) {
+    console.log ("in catch block", err)
     if (err instanceof Error) {
       yield put(profileFetchError(err.stack!))
     } else {
@@ -36,7 +36,7 @@ function* handleFetch() {
 // This is our watcher function. We use `take*()` functions to watch Redux for a specific action
 // type, and run our saga, for example the `handleFetch()` saga above.
 function* watchProfileFetch() {
-  yield takeEvery(ProfileActionTypes.PROFILE_FETCH, handleFetch)
+  yield takeEvery(ProfileActionTypes.PROFILE_FETCH_REQUEST, handleFetch)
 }
 
 // We can also use `fork()` here to split our saga into multiple watchers.

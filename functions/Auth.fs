@@ -15,8 +15,6 @@ open Microsoft.Extensions.Configuration
 ///</summary>
 module Auth =
     
-    let inline (!>) f g x = g(f x)
-
     type ResponseModel = {
         access_token: string
     }
@@ -35,7 +33,7 @@ module Auth =
         tryf Status.InternalServerError fn
 
     let getAppRole username = async {
-        let! role = async.Return (ok "role")
+        let! role = async.Return (ok ROLE_USER)
         return role
     }
 

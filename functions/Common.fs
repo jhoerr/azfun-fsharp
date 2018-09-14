@@ -17,6 +17,11 @@ open System.Net
 ///</summary>
 module Common =
 
+    // CONSTANTS
+
+    let ROLE_ADMIN = "admin"
+    let ROLE_USER = "user"
+
     // STATIC 
     let client = new HttpClient()
 
@@ -75,6 +80,7 @@ module Common =
         with
         | exn -> fail (status, sprintf "%s: %s" msg (exn.Message))
 
+    
     // HTTP REQUEST
 
     let tryDeserialize<'T> status str =
@@ -180,7 +186,7 @@ module Common =
             if l |> any Status.InternalServerError then Status.InternalServerError
             elif l |> any Status.NotFound then Status.NotFound
             elif l |> any Status.BadRequest then Status.BadRequest
-            else Status.InternalServerError
+            else l.Head |> fst
 
         // Flatten all error messages into a single array.
         let errors = 

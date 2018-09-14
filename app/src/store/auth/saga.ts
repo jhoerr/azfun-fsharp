@@ -2,24 +2,25 @@ import * as JWT from 'jwt-decode'
 import { push } from 'react-router-redux';
 import { all, call, fork, put, select, takeEvery } from 'redux-saga/effects'
 import { callApi, clearAuthToken, setAuthToken } from '../effects'
+import { IApplicationState } from '../index';
 import { signInError, signInSuccess } from './actions'
-import { AuthActionTypes, IAuthUser } from './types'
+import { AuthActionTypes, IAuthRequest, IAuthUser } from './types'
 
 const API_ENDPOINT = process.env.REACT_APP_API_URL || ''
 
 function* handleSignIn() {
   try {
-    const state = yield select();
+    const request = (yield select<IApplicationState>((s) => s.auth.request)) as IAuthRequest
+    const response = yield call(callApi, 'get', API_ENDPOINT, `/auth?code=${request.code}`)
 
-    const res = yield call(callApi, 'get', API_ENDPOINT, `/auth?code=${state.auth.code}`)
-
-    if (res.errors) {
+    if (response.errors) {
       yield call(clearAuthToken)
-      yield put(signInError(res.errors))
+      yield put(signInError(response.errors))
     } else {
-      yield call(setAuthToken, res.access_token)
-      yield put(signInSuccess(JWT<IAuthUser>(res.access_token)))
-      yield put(push('/profile'))
+      yield call(setAuthToken, response.access_token)
+      const decoded = JWT<IAuthUser>(response.access_token)
+      yield put(signInSuccess(decoded))
+      yield put(push(`/profile/${decoded.user_name}`))
     }
   } catch (err) {
     yield call(clearAuthToken)
@@ -39,7 +40,7 @@ function* handleSignOut() {
 // This is our watcher function. We use `take*()` functions to watch Redux for a specific action
 // type, and run our saga, for example the `handleFetch()` saga above.
 function* watchSignIn() {
-  yield takeEvery(AuthActionTypes.SIGN_IN, handleSignIn)
+  yield takeEvery(AuthActionTypes.SIGN_IN_REQUEST, handleSignIn)
 }
 
 function* watchSignOut() {

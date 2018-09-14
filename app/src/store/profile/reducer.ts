@@ -1,19 +1,20 @@
 import { Reducer } from 'redux'
-import { FetchErrorReducer, FetchReducer, FetchSuccessReducer } from '../common'
+import { FetchErrorReducer, FetchRequestReducer, FetchSuccessReducer } from '../common'
 import { IProfileState, ProfileActionTypes } from './types'
 
 // Type-safe initialState!
 const initialState: IProfileState = {
-  data: undefined,
-  error: undefined,
-  loading: false,
+    data: undefined,
+    error: undefined,
+    loading: false,
+    request: undefined,
 }
 
 // Thanks to Redux 4's much simpler typings, we can take away a lot of typings on the reducer side,
 // everything will remain type-safe.
 const reducer: Reducer<IProfileState> = (state = initialState, action) => {
   switch (action.type) {
-    case ProfileActionTypes.PROFILE_FETCH: return FetchReducer(state, action)
+    case ProfileActionTypes.PROFILE_FETCH_REQUEST: return FetchRequestReducer(state, action)
     case ProfileActionTypes.PROFILE_FETCH_SUCCESS: return FetchSuccessReducer(state, action)
     case ProfileActionTypes.PROFILE_FETCH_ERROR: return FetchErrorReducer(state, action)
     default: return state
