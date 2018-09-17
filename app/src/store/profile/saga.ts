@@ -1,8 +1,11 @@
 import { all, call, fork, put, select, takeEvery } from 'redux-saga/effects'
-import { callApiWithAuth } from '../effects'
+import { NotAuthorizedError } from '../../components/errors';
+import { AuthActionTypes  } from '../auth/types'
+import { callApiWithAuth, clearAuthToken } from '../effects'
 import { IApplicationState } from '../index';
 import { profileFetchError, profileFetchSuccess } from './actions'
-import { IProfile, IProfileRequest, ProfileActionTypes } from './types'
+import { IProfile, IProfileRequest, ProfileActionTypes,  } from './types'
+
 
 const API_ENDPOINT = process.env.REACT_APP_API_URL || ''
 
@@ -25,7 +28,11 @@ function* handleFetch() {
     }
   } catch (err) {
     console.log ("in catch block", err)
-    if (err instanceof Error) {
+    if (err instanceof NotAuthorizedError){
+      yield call(clearAuthToken)
+      yield put({ type:AuthActionTypes.SIGN_OUT})
+    }
+    else if (err instanceof Error) {
       yield put(profileFetchError(err.stack!))
     } else {
       yield put(profileFetchError('An unknown error occured.'))

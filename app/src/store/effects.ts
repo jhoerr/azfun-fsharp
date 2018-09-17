@@ -1,3 +1,5 @@
+import { NotAuthorizedError } from "../components/errors";
+
 const clearAuthToken = () =>
     sessionStorage.removeItem('authToken')
 
@@ -17,7 +19,16 @@ const callApi = (method: string, url: string, path: string, data?: any, headers?
         body: JSON.stringify(data),
         headers: combinedHeaders,
         method,
-    }).then(res => res.json())
+    })
+        .then(res => {
+            if (!res.ok){
+                throw res.status === 401 
+                    ? new NotAuthorizedError("user not authorized")
+                    : new Error(`Unable to complete request. The server returned ${res.statusText} (${res.status})`)
+            }
+            
+            return res.json()})
+
 }
 
 const callApiWithAuth = (method: string, url: string, path: string, data?: any) => {
