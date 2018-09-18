@@ -14,9 +14,16 @@ const initialState: IAuthState = {
 // everything will remain type-safe.
 const reducer: Reducer<IAuthState> = (state = initialState, action) => {
   switch (action.type) {
-    case AuthActionTypes.SIGN_IN_REQUEST: return FetchRequestReducer(state, action)
-    case AuthActionTypes.SIGN_IN_SUCCESS: return FetchSuccessReducer(state, action)
-    case AuthActionTypes.SIGN_IN_ERROR: return FetchErrorReducer(state, action)
+    case AuthActionTypes.SIGN_IN_REQUEST:
+      return { ...state, 
+        data: undefined,
+        error: undefined,
+        loading: false,
+        request: undefined,
+      }  
+    case AuthActionTypes.POST_SIGN_IN_REQUEST: return FetchRequestReducer(state, action)
+    case AuthActionTypes.POST_SIGN_IN_SUCCESS: return FetchSuccessReducer(state, action)
+    case AuthActionTypes.POST_SIGN_IN_ERROR: return FetchErrorReducer(state, action)
     case AuthActionTypes.SIGN_OUT:
       return { ...state, 
           data: undefined,

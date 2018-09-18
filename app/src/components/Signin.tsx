@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
 
 import { IApplicationState  } from '../store'
-import { signInRequest  } from '../store/auth/actions'
+import { postSignInRequest  } from '../store/auth/actions'
 import { IAuthRequest, IAuthState,   } from '../store/auth/types'
 
 interface ILocationProps {
@@ -16,7 +16,7 @@ interface ISigninProps {
 }
 // We can use `typeof` here to map our dispatch types to the props, like so.
 interface IPropsFromDispatch {
-    signInRequest: typeof signInRequest
+    signInRequest: typeof postSignInRequest
 }
 
 class Signin extends React.Component<IAuthState & ISigninProps & IPropsFromDispatch> {
@@ -53,7 +53,7 @@ const mapStateToProps = ({ auth }: IApplicationState) : IAuthState => auth
   // mapDispatchToProps is especially useful for constraining our actions to the connected component.
   // You can access these via `this.props`.
   const mapDispatchToProps = (dispatch: Dispatch) => ({
-    signInRequest: (request:IAuthRequest) => dispatch(signInRequest(request))
+    signInRequest: (request:IAuthRequest) => dispatch(postSignInRequest(request))
   })
   
 // Now let's connect our component!

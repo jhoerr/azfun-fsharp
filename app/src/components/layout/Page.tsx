@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
 import { Footer, Header, HeaderIdentity, HeaderMenu, HeaderNavigation } from 'rivet-react';
 import { IApplicationState  } from '../../store'
-import { signOutRequest  } from '../../store/auth/actions'
+import { signInRequest, signOutRequest } from '../../store/auth/actions'
 import { IAuthUser } from '../../store/auth/types';
 
 export interface IPageProps {
@@ -13,10 +13,11 @@ export interface IPageProps {
 
 // We can use `typeof` here to map our dispatch types to the props, like so.
 interface IPropsFromDispatch {
+  signIn: typeof signInRequest
   signOut: typeof signOutRequest
 }
 
-const Page: React.SFC<IPageProps & IPropsFromDispatch> = ({ user, signOut, children }) => (
+const Page: React.SFC<IPageProps & IPropsFromDispatch> = ({ user, signIn, signOut, children }) => (
   <>
     <Header title="IT Pro Database">
       { user &&
@@ -37,7 +38,7 @@ const Page: React.SFC<IPageProps & IPropsFromDispatch> = ({ user, signOut, child
       }
       { !user &&
         <HeaderNavigation>
-          <a href={`${process.env.REACT_APP_OAUTH2_AUTH_URL}?response_type=code&client_id=${process.env.REACT_APP_OAUTH2_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_WEB_URL}/signin`}>Log In</a>
+          <a href="#" onClick={signIn}>Log In</a>
         </HeaderNavigation>
       }
     </Header>
@@ -57,8 +58,9 @@ const mapStateToProps = ({ auth }: IApplicationState) => ({
 
 // mapDispatchToProps is especially useful for constraining our actions to the connected component.
 // You can access these via `this.props`.
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  signOut: () => dispatch(signOutRequest())
+const mapDispatchToProps = (dispatch: Dispatch) : IPropsFromDispatch => ({
+  signIn: () => dispatch(signInRequest()),
+  signOut: () => dispatch(signOutRequest()),
 })
 
 // Now let's connect our component!

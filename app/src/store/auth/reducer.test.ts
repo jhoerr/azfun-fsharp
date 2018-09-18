@@ -9,7 +9,7 @@ it("reduces the sign in request", () => {
         loading: true,
     }
 
-    expect(authReducer(undefined, actions.signInRequest({code: "code"})))
+    expect(authReducer(undefined, actions.postSignInRequest({code: "code"})))
         .toEqual(expectedState)
 });
 
@@ -31,6 +31,6 @@ it("reduces the success in request", () => {
         loading: false,
     }
 
-    expect(authReducer(startingState, actions.signInSuccess(user)))
+    expect(authReducer(startingState, actions.postSignInSuccess(user)))
         .toEqual(expectedState)
 });

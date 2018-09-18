@@ -8,8 +8,9 @@ import { IApiState } from '../common'
 // of Redux's `@@INIT` action.
 export const enum AuthActionTypes {
     SIGN_IN_REQUEST = '@@auth/SIGN_IN',
-    SIGN_IN_SUCCESS = '@@auth/SIGN_IN_SUCCESS',
-    SIGN_IN_ERROR = '@@auth/SIGN_IN_ERROR',
+    POST_SIGN_IN_REQUEST = '@@auth/POST_SIGN_IN',
+    POST_SIGN_IN_SUCCESS = '@@auth/POST_SIGN_IN_SUCCESS',
+    POST_SIGN_IN_ERROR = '@@auth/POST_SIGN_IN_ERROR',
     SIGN_OUT = '@@auth/SIGN_OUT',
 }
 

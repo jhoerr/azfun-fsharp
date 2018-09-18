@@ -1,33 +1,38 @@
 import * as JWT from 'jwt-decode'
 import { push } from 'react-router-redux';
 import { all, call, fork, put, select, takeEvery } from 'redux-saga/effects'
-import { callApi, clearAuthToken, setAuthToken } from '../effects'
+import { callApi, clearAuthToken, redirectToLogin, setAuthToken } from '../effects'
 import { IApplicationState } from '../index';
-import { signInError, signInSuccess } from './actions'
+import { postSignInError, postSignInSuccess } from './actions'
 import { AuthActionTypes, IAuthRequest, IAuthUser } from './types'
 
 const API_ENDPOINT = process.env.REACT_APP_API_URL || ''
 
-function* handleSignIn() {
+function* handleSignIn(){
+  yield call(clearAuthToken)
+  yield call(redirectToLogin)
+}
+
+function* handlePostSignIn() {
   try {
     const request = (yield select<IApplicationState>((s) => s.auth.request)) as IAuthRequest
     const response = yield call(callApi, 'get', API_ENDPOINT, `/auth?code=${request.code}`)
 
     if (response.errors) {
       yield call(clearAuthToken)
-      yield put(signInError(response.errors))
+      yield put(postSignInError(response.errors))
     } else {
       yield call(setAuthToken, response.access_token)
       const decoded = JWT<IAuthUser>(response.access_token)
-      yield put(signInSuccess(decoded))
+      yield put(postSignInSuccess(decoded))
       yield put(push(`/profile/${decoded.user_name}`))
     }
   } catch (err) {
     yield call(clearAuthToken)
     if (err instanceof Error) {
-      yield put(signInError(err.stack!))
+      yield put(postSignInError(err.stack!))
     } else {
-      yield put(signInError('An unknown error occured.'))
+      yield put(postSignInError('An unknown error occured.'))
     }
   }
 }
@@ -43,13 +48,17 @@ function* watchSignIn() {
   yield takeEvery(AuthActionTypes.SIGN_IN_REQUEST, handleSignIn)
 }
 
+function* watchPostSignIn() {
+  yield takeEvery(AuthActionTypes.POST_SIGN_IN_REQUEST, handlePostSignIn)
+}
+
 function* watchSignOut() {
   yield takeEvery(AuthActionTypes.SIGN_OUT, handleSignOut)
 }
 
 // We can also use `fork()` here to split our saga into multiple watchers.
 function* authSaga() {
-  yield all([fork(watchSignIn), fork(watchSignOut)])
+  yield all([fork(watchSignIn), fork(watchPostSignIn), fork(watchSignOut)])
 }
 
 export default authSaga

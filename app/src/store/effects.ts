@@ -9,6 +9,9 @@ const getAuthToken = () =>
 const setAuthToken = (token: string) => 
     sessionStorage.setItem('authToken', token)
 
+const redirectToLogin = () =>
+    window.location.assign(`${process.env.REACT_APP_OAUTH2_AUTH_URL}?response_type=code&client_id=${process.env.REACT_APP_OAUTH2_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_WEB_URL}/signin`)
+
 const callApi = (method: string, url: string, path: string, data?: any, headers?: any) => {
     const combinedHeaders = {
         Accept: 'application/json',
@@ -42,5 +45,6 @@ export {
     callApiWithAuth,
     clearAuthToken,
     getAuthToken,
-    setAuthToken 
+    setAuthToken ,
+    redirectToLogin
 }
