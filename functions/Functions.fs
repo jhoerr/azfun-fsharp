@@ -56,11 +56,29 @@ module Functions =
         context: ExecutionContext) =
             context |> appConfig |> Auth.run req log |> Async.StartAsTask
 
-    [<FunctionName("Profile")>]
-    let profile
-        ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "profile/{username}")>]
+    [<FunctionName("ProfileGetMe")>]
+    let profileGetMe
+        ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "profile")>]
+        req: HttpRequest,
+        log: TraceWriter,
+        context: ExecutionContext) =
+            context |> appConfig |> ProfileGetMe.run req log |> Async.StartAsTask
+
+    [<FunctionName("ProfileGet")>]
+    let profileGet
+        ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "profile/{id}")>]
         req: HttpRequest,
         log: TraceWriter,
         context: ExecutionContext,
-        username: string) =
-            context |> appConfig |> Profile.run req log username |> Async.StartAsTask
+        id: Id) =
+            context |> appConfig |> ProfileGet.run req log id |> Async.StartAsTask
+
+
+    [<FunctionName("ProfilePut")>]
+    let profilePut
+        ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "put", Route = "profile/{id}")>]
+        req: HttpRequest,
+        log: TraceWriter,
+        context: ExecutionContext,
+        id: Id) =
+            context |> appConfig |> ProfilePut.run req log id |> Async.StartAsTask

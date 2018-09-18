@@ -28,7 +28,8 @@ module AuthUtil =
         let! jwt = extractJwt authHeader
         let! claims = decodeAppJwt secret jwt
         return claims
-    } 
+    }
+
     let validateRole roles (claims:JwtClaims) =
         if roles |> Seq.exists (fun role -> claims.UserRole = role)
         then ok claims
@@ -39,6 +40,7 @@ module AuthUtil =
         let! user = validateRole [ROLE_ADMIN] claims
         return user
     }
+    
     let requireUserRole (config:AppConfig) (req: HttpRequest) = trial {
         let! claims = validateAuth config.JwtSecret req
         let! user = validateRole [ROLE_USER; ROLE_ADMIN] claims

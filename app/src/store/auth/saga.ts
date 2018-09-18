@@ -25,7 +25,7 @@ function* handlePostSignIn() {
       yield call(setAuthToken, response.access_token)
       const decoded = JWT<IAuthUser>(response.access_token)
       yield put(postSignInSuccess(decoded))
-      yield put(push(`/profile/${decoded.user_name}`))
+      yield put(push(`/profile`))
     }
   } catch (err) {
     yield call(clearAuthToken)

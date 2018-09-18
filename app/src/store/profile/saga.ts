@@ -1,30 +1,21 @@
-import { all, call, fork, put, select, takeEvery } from 'redux-saga/effects'
+import { all, call, fork, put, takeEvery } from 'redux-saga/effects'
 import { NotAuthorizedError } from '../../components/errors';
 import { signInRequest  } from '../auth/actions'
 import { callApiWithAuth } from '../effects'
-import { IApplicationState } from '../index';
 import { profileFetchError, profileFetchSuccess } from './actions'
-import { IProfile, IProfileRequest, ProfileActionTypes,  } from './types'
+import { ProfileActionTypes,  } from './types'
 
 
 const API_ENDPOINT = process.env.REACT_APP_API_URL || ''
 
-const stubProfile : IProfile = {
-    department: "UITS",
-    displayName: "John Hoerr",
-    expertise: "Web dev, classic cocktails, underwater basket weaving",
-    username: "jhoerr",    
-}
-
 function* handleFetch() {
   try {
-    const request = (yield select<IApplicationState>((s) => s.profile.request)) as IProfileRequest
-    const response = yield call(callApiWithAuth, 'get', API_ENDPOINT, `/profile/${request.username}`)
+    const response = yield call(callApiWithAuth, 'get', API_ENDPOINT, `/profile`)
     console.log ("in try block", response)
     if (response.errors) {
       yield put(profileFetchError(response.errors))
     } else {
-      yield put(profileFetchSuccess(stubProfile))
+      yield put(profileFetchSuccess(response))
     }
   } catch (err) {
     console.log ("in catch block", err)

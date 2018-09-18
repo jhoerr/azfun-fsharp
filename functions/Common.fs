@@ -41,6 +41,15 @@ module Common =
         JwtSecret: string
     }
 
+    type Id = int
+    type Name = string
+    type GetRecords<'T> = unit -> Async<Result<list<'T>,(Status*string)>>
+    type GetRecordById<'T> = Id -> Async<Result<'T,(Status*string)>>
+    type GetRecordByName<'T> = Name -> Async<Result<'T,(Status*string)>>
+    type CreateRecord<'T> = 'T -> Async<Result<'T,(Status*string)>>
+    type UpdateRecord<'T> = Id -> 'T -> Async<Result<'T,(Status*string)>>
+    type DeleteRecord<'T> = Id -> Async<Result<'T,(Status*string)>>
+
     // UTILITY FUNCTIONS
 
     /// <summary>
