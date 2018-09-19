@@ -10,13 +10,21 @@ export const enum ProfileActionTypes {
     PROFILE_FETCH_REQUEST = '@@profile/PROFILE_FETCH_REQUEST',
     PROFILE_FETCH_SUCCESS = '@@profile/PROFILE_FETCH_SUCCESS',
     PROFILE_FETCH_ERROR = '@@profile/PROFILE_FETCH_ERROR',
+    PROFILE_UPDATE_REQUEST = '@@profile/PROFILE_UPDATE_REQUEST',
+    PROFILE_UPDATE_SUCCESS = '@@profile/PROFILE_UPDATE_SUCCESS',
+    PROFILE_UPDATE_ERROR = '@@profile/PROFILE_UPDATE_ERROR',
 }
 
 export interface IProfileRequest {
-    username: string,
+    id: number,
+}
+
+export interface IProfileUpdateRequest extends IProfileRequest {
+    expertise: string,
 }
 
 export interface IProfile {
+    id: number,
     username: string,
     displayName: string,
     department: string,

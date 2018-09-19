@@ -1,16 +1,19 @@
-import { all, call, fork, put, takeEvery } from 'redux-saga/effects'
+import { all, call, fork, put, select, takeEvery } from 'redux-saga/effects'
 import { NotAuthorizedError } from '../../components/errors';
 import { signInRequest  } from '../auth/actions'
 import { callApiWithAuth } from '../effects'
+import { IApplicationState } from '../index';
 import { profileFetchError, profileFetchSuccess } from './actions'
-import { ProfileActionTypes,  } from './types'
+import { IProfileRequest, ProfileActionTypes  } from './types'
 
 
 const API_ENDPOINT = process.env.REACT_APP_API_URL || ''
 
 function* handleFetch() {
   try {
-    const response = yield call(callApiWithAuth, 'get', API_ENDPOINT, `/profile`)
+    const state = (yield select<IApplicationState>((s) => s.profile.request)) as IProfileRequest
+    const path = state.id === 0 ? "/profile" : `profile/${state.id}`
+    const response = yield call(callApiWithAuth, 'get', API_ENDPOINT, path)
     console.log ("in try block", response)
     if (response.errors) {
       yield put(profileFetchError(response.errors))
@@ -29,6 +32,7 @@ function* handleFetch() {
     }
   }
 }
+
 
 // This is our watcher function. We use `take*()` functions to watch Redux for a specific action
 // type, and run our saga, for example the `handleFetch()` saga above.

@@ -2,12 +2,15 @@ import { AnyAction } from "redux";
 
 // TYPES
 
-// Declare state types with `readonly` modifier to get compile time immutability.
-// https://github.com/piotrwitek/react-redux-typescript-guide#state-with-type-level-immutability
-export interface IApiState<TRequest, TResponse> {
+export interface IApiState2<TResponse> {
     readonly data?: TResponse
     readonly error?: string
     readonly loading: boolean
+}
+
+// Declare state types with `readonly` modifier to get compile time immutability.
+// https://github.com/piotrwitek/react-redux-typescript-guide#state-with-type-level-immutability
+export interface IApiState<TRequest, TResponse> extends IApiState2<TResponse> {
     readonly request?: TRequest,
 }
 

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import Home from './components/Home';
 import Page from './components/layout/Page';
-import Profile from './components/Profile';
+import ProfileContainer from './components/ProfileContainer';
 import Signin from './components/Signin';
 
 const App : React.SFC = () => (
@@ -10,7 +10,8 @@ const App : React.SFC = () => (
     <Switch>
       <Route path="/" exact={true} component={Home} />
       <Route path="/signin" component={Signin} />
-      <Route path="/profile" component={Profile} />
+      <Route path="/profile/" component={ProfileContainer} /> 
+      <Route path="/profile/:id" component={ProfileContainer} /> 
     </Switch>
   </Page>
 )

@@ -17,6 +17,9 @@ const reducer: Reducer<IProfileState> = (state = initialState, action) => {
     case ProfileActionTypes.PROFILE_FETCH_REQUEST: return FetchRequestReducer(state, action)
     case ProfileActionTypes.PROFILE_FETCH_SUCCESS: return FetchSuccessReducer(state, action)
     case ProfileActionTypes.PROFILE_FETCH_ERROR: return FetchErrorReducer(state, action)
+    case ProfileActionTypes.PROFILE_UPDATE_REQUEST: return FetchRequestReducer(state, action)
+    case ProfileActionTypes.PROFILE_UPDATE_SUCCESS: return FetchSuccessReducer(state, action)
+    case ProfileActionTypes.PROFILE_UPDATE_ERROR: return FetchErrorReducer(state, action)
     default: return state
   }
 }
