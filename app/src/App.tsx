@@ -10,8 +10,8 @@ const App : React.SFC = () => (
     <Switch>
       <Route path="/" exact={true} component={Home} />
       <Route path="/signin" component={Signin} />
-      <Route path="/profile/" component={ProfileContainer} /> 
       <Route path="/profile/:id" component={ProfileContainer} /> 
+      <Route path="/profile/" component={ProfileContainer} /> 
     </Switch>
   </Page>
 )

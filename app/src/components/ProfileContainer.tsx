@@ -22,13 +22,11 @@ interface IPropsFromDispatch {
 class ProfileContainer extends React.Component<IProfileState & IProfileProps & IPropsFromDispatch>{
 
     public isMyProfile() {
-        console.log("match path: ", this.props.match.path)
-        return this.props.match.path.endsWith('/profile/')
+        return this.props.match.params.id === undefined
     }
 
     public componentDidMount() {
-        console.log("match params: ", this.props.match.params)
-        const id = this.isMyProfile ? 0 : this.props.match.params.id
+        const id = this.isMyProfile ? 0 : Number(this.props.match.params.id)
         this.props.profileFetchRequest({ id })
     }
 
