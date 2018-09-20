@@ -1,4 +1,5 @@
 import { Action, AnyAction, combineReducers, Dispatch } from 'redux'
+import { reducer as formReducer } from 'redux-form'
 import { all, fork } from 'redux-saga/effects'
 
 import { authReducer, initialAuthState } from './auth/reducer'
@@ -12,11 +13,13 @@ import { IProfileState } from './profile/types';
 // The top-level state object
 export interface IApplicationState {
   auth: IAuthState,
-  profile: IProfileState
+  profile: IProfileState,
+  form: any
 }
 
 export const initialState : IApplicationState = {
   auth: initialAuthState,
+  form: {},
   profile: initialProfileState
 }
 
@@ -30,6 +33,7 @@ export interface IConnectedReduxProps<A extends Action = AnyAction> {
 // the reducer acts on the corresponding ApplicationState property type.
 export const rootReducer = combineReducers<IApplicationState>({
   auth: authReducer,
+  form: formReducer,
   profile: profileReducer
 })
 
