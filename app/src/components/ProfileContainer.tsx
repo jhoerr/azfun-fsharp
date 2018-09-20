@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { IApplicationState } from '../store';
 import { profileFetchRequest, profileUpdateRequest } from '../store/profile/actions';
-import { IProfileRequest, IProfileState, IProfileUpdateRequest } from '../store/profile/types';
+import { IProfileRequest, IProfileState } from '../store/profile/types';
 import PageTitle from './layout/PageTitle';
 import ProfileForm from './ProfileForm';
 import ReadOnlyProfile from './ReadOnlyProfile';
@@ -34,10 +34,11 @@ class ProfileContainer extends React.Component<IProfileState & IProfileProps & I
         return (
             <>
                 <PageTitle>Profile</PageTitle>
-                { !this.isMyProfile() && 
-                    <ReadOnlyProfile {...this.props} />}
+                { this.props.data && !this.isMyProfile() && 
+                    <ReadOnlyProfile {...this.props.data} /> }                        
                 { this.isMyProfile() && 
-                    <ProfileForm {...this.props} onSubmit={this.props.profileUpdateRequest} /> }
+                    <ProfileForm initialValues={this.props.data} {...this.props} onSubmit={this.props.profileUpdateRequest}/> }
+
             </>
         )
     }
@@ -53,7 +54,7 @@ const mapStateToProps = ({ profile }: IApplicationState) => ({
   // You can access these via `this.props`.
   const mapDispatchToProps = (dispatch: Dispatch) : IPropsFromDispatch => ({
     profileFetchRequest: (request: IProfileRequest) => dispatch(profileFetchRequest(request)),
-    profileUpdateRequest: (request: IProfileUpdateRequest) => dispatch(profileUpdateRequest(request))
+    profileUpdateRequest: (request: IProfileRequest) => dispatch(profileUpdateRequest(request))
   })
   
 // Now let's connect our component!

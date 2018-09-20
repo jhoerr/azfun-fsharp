@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { List } from "rivet-react";
 import { IProfile } from "../store/profile/types";
-import { withLoading } from './util';
 
 const ReadOnlyProfile : React.SFC<IProfile> = 
 ({ username, displayName, department, expertise }) => (
@@ -12,4 +11,4 @@ const ReadOnlyProfile : React.SFC<IProfile> =
             <li><strong>Expertise:</strong> {expertise}</li>
         </List>
 )
-export default withLoading<IProfile, {}>(ReadOnlyProfile)
+export default ReadOnlyProfile

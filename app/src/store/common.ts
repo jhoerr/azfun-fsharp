@@ -19,7 +19,7 @@ export interface IApiState<TRequest, TResponse> extends IApiState2<TResponse> {
 export const FetchRequestReducer = <TReq,TRes>(state:IApiState<TReq, TRes>, action:AnyAction) : IApiState<TReq, TRes> => {
     console.log("Request payload", action.payload)
     return { ...state, 
-        data: undefined,
+        // data: undefined,
         error: undefined,
         loading: true,
         request: action.payload,

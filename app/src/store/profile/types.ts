@@ -19,16 +19,15 @@ export interface IProfileRequest {
     id: number,
 }
 
-export interface IProfileUpdateRequest extends IProfileRequest {
-    expertise: string,
+export interface IProfileUpdateRequest {
+    expertise: string
 }
 
-export interface IProfile {
+export interface IProfile extends IProfileUpdateRequest {
     id: number,
     username: string,
     displayName: string,
     department: string,
-    expertise: string
 }
 
 export interface IProfileState extends IApiState<IProfileRequest, IProfile> { 
