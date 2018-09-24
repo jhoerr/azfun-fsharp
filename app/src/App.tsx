@@ -11,7 +11,7 @@ const App : React.SFC = () => (
       <Route path="/" exact={true} component={Home} />
       <Route path="/signin" component={Signin} />
       <Route path="/profile/:id" component={ProfileContainer} /> 
-      <Route path="/profile/" component={ProfileContainer} /> 
+      <Route path="/me" component={ProfileContainer} /> 
     </Switch>
   </Page>
 )

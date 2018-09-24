@@ -88,6 +88,7 @@ module ProfileGet =
     /// Say hello to a person by name.
     /// </summary>
     let run (req: HttpRequest) (log: TraceWriter) id config = async {
+        log.Info
         use cn = new SqlConnection(config.DbConnectionString);
         let getProfileRecordById = getProfileRecordById cn id
         let! result = workflow req config getProfileRecordById |> Async.ofAsyncResult

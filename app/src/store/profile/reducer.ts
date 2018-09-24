@@ -1,5 +1,5 @@
 import { Reducer } from 'redux'
-import { FetchErrorReducer, FetchRequestReducer, FetchSuccessReducer } from '../common'
+import { FetchErrorReducer, FetchRequestReducer, FetchSuccessReducer, PutErrorReducer, PutRequestReducer, PutSuccessReducer } from '../common'
 import { IProfileState, ProfileActionTypes } from './types'
 
 // Type-safe initialState!
@@ -17,9 +17,9 @@ const reducer: Reducer<IProfileState> = (state = initialState, action) => {
     case ProfileActionTypes.PROFILE_FETCH_REQUEST: return FetchRequestReducer(state, action)
     case ProfileActionTypes.PROFILE_FETCH_SUCCESS: return FetchSuccessReducer(state, action)
     case ProfileActionTypes.PROFILE_FETCH_ERROR: return FetchErrorReducer(state, action)
-    case ProfileActionTypes.PROFILE_UPDATE_REQUEST: return FetchRequestReducer(state, action)
-    case ProfileActionTypes.PROFILE_UPDATE_SUCCESS: return FetchSuccessReducer(state, action)
-    case ProfileActionTypes.PROFILE_UPDATE_ERROR: return FetchErrorReducer(state, action)
+    case ProfileActionTypes.PROFILE_UPDATE_REQUEST: return PutRequestReducer(state, action)
+    case ProfileActionTypes.PROFILE_UPDATE_SUCCESS: return PutSuccessReducer(state, action)
+    case ProfileActionTypes.PROFILE_UPDATE_ERROR: return PutErrorReducer(state, action)
     default: return state
   }
 }

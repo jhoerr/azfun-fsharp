@@ -39,6 +39,9 @@ const ProfileForm : React.SFC<IApiState2<IProfile> & IProfileFormProps & Injecte
                     </Form>
                   </>
                 }
+                { error && 
+                  <p>{error}</p>
+                }
             </>
         )
     
