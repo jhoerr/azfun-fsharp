@@ -10,6 +10,8 @@ open System.Net
 open System.Net.Http
 open System.Net.Http.Headers
 open System.Net
+open Newtonsoft.Json
+open Newtonsoft.Json.Serialization
 
 ///<summary>
 /// This module contains common types and functions to facilitate request 
@@ -39,6 +41,7 @@ module Common =
         OAuth2TokenUrl: string
         OAuth2RedirectUrl: string
         JwtSecret: string
+        DbConnectionString: string
     }
 
     type Id = int
@@ -125,11 +128,6 @@ module Common =
         | exn -> return fail (Status.InternalServerError, exn.Message)
     }
 
-    // JWT
-
-
-
-
     // HTTP RESPONSE
 
     /// <summary>
@@ -173,11 +171,15 @@ module Common =
         let content = new StringContent(str)
         httpResponse status content "text/plain"
 
+    let jsonSettings = JsonSerializerSettings(ContractResolver=CamelCasePropertyNamesContractResolver())
+
     /// <summary>
     /// Construct an HTTP response with JSON content
     /// </summary>
     let jsonResponse status model = 
-        let content = model |> JsonConvert.SerializeObject |> (fun s -> new StringContent(s))
+        let content = 
+            JsonConvert.SerializeObject(model, jsonSettings)
+            |> (fun s -> new StringContent(s))
         httpResponse status content "application/json"
 
     // ROP

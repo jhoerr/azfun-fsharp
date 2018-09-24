@@ -25,6 +25,7 @@ module Functions =
             OAuth2TokenUrl = config.["OAuthTokenUrl"]
             OAuth2RedirectUrl = config.["OAuthRedirectUrl"]
             JwtSecret = config.["JwtSecret"]
+            DbConnectionString = config.["DbConnectionString"]
         }
 
     [<FunctionName("Ping")>]

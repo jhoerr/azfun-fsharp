@@ -26,7 +26,7 @@ export interface IProfileUpdateRequest {
 export interface IProfile extends IProfileUpdateRequest {
     id: number,
     username: string,
-    displayName: string,
+    preferredName: string,
     department: string,
 }
 

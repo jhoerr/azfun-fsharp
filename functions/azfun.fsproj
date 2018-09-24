@@ -4,6 +4,8 @@
     <AzureFunctionsVersion></AzureFunctionsVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="1.50.5" />
+    <PackageReference Include="Dapper.SimpleCRUD" Version="2.0.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.19" />
     <PackageReference Include="Chessie" Version="0.6.0" />
     <PackageReference Include="JWT" Version="4.0.0" />

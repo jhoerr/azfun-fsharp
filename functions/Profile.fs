@@ -1,6 +1,8 @@
 namespace MyFunctions
 
 open Chessie.ErrorHandling
+open System.Data.SqlClient
+open Dapper
 open Common
 open AuthUtil
 open Microsoft.AspNetCore.Http
@@ -8,39 +10,40 @@ open Microsoft.Azure.WebJobs.Host
 
 module Profile =
 
-    type ResponseModel = {
-        id: Id
-        username: string
-        displayName: string
-        department: string
-        expertise: string
+    [<CLIMutable>]
+    [<Table("Users")>]
+    type User = {
+        Id: Id
+        Username: string
+        PreferredName: string
+        Department: string
+        Expertise: string
     }
 
-    let getProfileRecordByName name = async {
-        let! result = async.Return { 
-            id=1
-            username="bmoberly"
-            displayName="Brent Moberly"
-            department="UITS"
-            expertise="typing, chivalry" 
-        }
-        return ok result
+    type UserRequest = {
+        Username: string
     }
 
-    let getProfileRecordById id = async {
-        let! result = async.Return { 
-            id=1
-            username="bmoberly"
-            displayName="Brent Moberly"
-            department="UITS"
-            expertise="typing, chivalry" 
-        }
-        return ok result
+    let getProfileRecordByName (cn:SqlConnection) username = async {
+        let! queryResultSeq = cn.GetListAsync<User>({Username=username}) |> Async.AwaitTask
+        match queryResultSeq |> Seq.tryHead with
+        | None -> return fail (Status.NotFound, sprintf "No user found with name '%s'" username)
+        | Some (resp) -> return ok resp
     }
 
-    let updateProfileDatabaseRecord id record = async {
-        let! result = async.Return record
-        return ok result
+    let getProfileRecordById (cn:SqlConnection) id = async {
+        let! queryResult = cn.GetAsync<User>(id) |> Async.AwaitTask
+        match box queryResult with
+        | null -> return fail (Status.NotFound, sprintf "No user found with id %d" id)
+        | _ -> return ok queryResult
+    }
+
+    let updateProfileDatabaseRecord (cn:SqlConnection) id record update = async {
+        let update = {record with Expertise=update.Expertise}
+        let! cmdResult = cn.UpdateAsync<User>(update) |> Async.AwaitTask
+        match cmdResult with
+        | 0 -> return fail (Status.NotFound, sprintf "No user found with id %d" id)
+        | _ -> return ok update
     }
 
 ///<summary>
@@ -61,6 +64,8 @@ module ProfileGetMe =
     /// Say hello to a person by name.
     /// </summary>
     let run (req: HttpRequest) (log: TraceWriter) config = async {
+        use cn = new SqlConnection(config.DbConnectionString);
+        let getProfileRecordByName = getProfileRecordByName cn
         let! result = workflow req config getProfileRecordByName |> Async.ofAsyncResult
         return constructResponse log result
     }
@@ -83,7 +88,8 @@ module ProfileGet =
     /// Say hello to a person by name.
     /// </summary>
     let run (req: HttpRequest) (log: TraceWriter) id config = async {
-        let getProfileRecordById = getProfileRecordById id
+        use cn = new SqlConnection(config.DbConnectionString);
+        let getProfileRecordById = getProfileRecordById cn id
         let! result = workflow req config getProfileRecordById |> Async.ofAsyncResult
         return constructResponse log result
     }
@@ -97,18 +103,19 @@ module ProfilePut =
 
     let workflow (req: HttpRequest) (config:AppConfig) getProfileRecord updateProfileRecord = asyncTrial {
         let! claims = requireUserRole config req
-        let! body = deserializeBody<Profile.ResponseModel> req
-        let! validBody = validatePostBody body
+        let! body = deserializeBody<User> req
+        let! update = validatePostBody body
         let! record = bindAsyncResult (fun () -> getProfileRecord)
         let! _ = validateUserCanEditRecord claims record
-        let! updatedRecord = bindAsyncResult (fun () -> updateProfileRecord validBody)
+        let! updatedRecord = bindAsyncResult (fun () -> updateProfileRecord record update)
         let response = updatedRecord |> jsonResponse Status.OK
         return response
     }
 
     let run req log id config = async {
-        let getProfileRecord = getProfileRecordById id
-        let updateProfileRecord = updateProfileDatabaseRecord id
+        use cn = new SqlConnection(config.DbConnectionString);
+        let getProfileRecord = getProfileRecordById cn id
+        let updateProfileRecord = updateProfileDatabaseRecord cn id
         let! result = workflow req config getProfileRecord updateProfileRecord |> Async.ofAsyncResult
         return constructResponse log result
     }

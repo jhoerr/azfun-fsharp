@@ -30,7 +30,7 @@ const ProfileForm : React.SFC<IApiState2<IProfile> & IProfileFormProps & Injecte
                   <>
                     <List>
                         <li><strong>Username:</strong> {data.username}</li>
-                        <li><strong>Display Name:</strong> {data.displayName}</li>
+                        <li><strong>Display Name:</strong> {data.preferredName}</li>
                         <li><strong>Department:</strong> {data.department}</li>
                     </List>
                     <Form  label="Profile update" labelVisibility="screen-reader-only" method="GET" onSubmit={handleSubmit}>
