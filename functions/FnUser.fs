@@ -1,14 +1,13 @@
-namespace MyFunctions
+namespace MyFunctions.User
 
 open Chessie.ErrorHandling
 open System.Data.SqlClient
 open Dapper
-open Common
-open AuthUtil
+open MyFunctions.Common
 open Microsoft.AspNetCore.Http
 open Microsoft.Azure.WebJobs.Host
 
-module Profile =
+module UserCommon =
 
     [<CLIMutable>]
     [<Table("Users")>]
@@ -50,8 +49,8 @@ module Profile =
 /// This module provides a function to return "Pong!" to the calling client. 
 /// It demonstrates a basic GET request and response.
 ///</summary>
-module ProfileGetMe =
-    open Profile
+module GetMe =
+    open UserCommon
     
     let workflow (req: HttpRequest) (config:AppConfig) getProfileRecordByName = asyncTrial {
         let! claims = requireUserRole config req
@@ -74,8 +73,8 @@ module ProfileGetMe =
 /// This module provides a function to return "Pong!" to the calling client. 
 /// It demonstrates a basic GET request and response.
 ///</summary>
-module ProfileGet =
-    open Profile
+module GetId =
+    open UserCommon
     
     let workflow (req: HttpRequest) (config:AppConfig) getProfileRecordById = asyncTrial {
         let! _ = requireUserRole config req
@@ -88,15 +87,14 @@ module ProfileGet =
     /// Say hello to a person by name.
     /// </summary>
     let run (req: HttpRequest) (log: TraceWriter) id config = async {
-        log.Info
         use cn = new SqlConnection(config.DbConnectionString);
         let getProfileRecordById = getProfileRecordById cn id
         let! result = workflow req config getProfileRecordById |> Async.ofAsyncResult
         return constructResponse log result
     }
 
-module ProfilePut =
-    open Profile
+module Put =
+    open UserCommon
 
     let validatePostBody body = ok body
 

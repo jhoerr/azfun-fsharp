@@ -33,7 +33,7 @@ module Functions =
         ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "ping")>]
         req: HttpRequest,
         log: TraceWriter) =
-            Ping.run req log |> Async.StartAsTask
+            Ping.Get.run req log |> Async.StartAsTask
 
     [<FunctionName("Auth")>]
     let auth
@@ -41,7 +41,7 @@ module Functions =
         req: HttpRequest,
         log: TraceWriter,
         context: ExecutionContext) =
-            context |> appConfig |> Auth.run req log |> Async.StartAsTask
+            context |> appConfig |> Auth.Post.run req log |> Async.StartAsTask
 
     [<FunctionName("ProfileGet")>]
     let profileGet
@@ -50,7 +50,7 @@ module Functions =
         log: TraceWriter,
         context: ExecutionContext,
         id: Id) =
-            context |> appConfig |> ProfileGet.run req log id |> Async.StartAsTask
+            context |> appConfig |> User.GetId.run req log id |> Async.StartAsTask
 
     [<FunctionName("ProfileGetMe")>]
     let profileGetMe
@@ -58,7 +58,7 @@ module Functions =
         req: HttpRequest,
         log: TraceWriter,
         context: ExecutionContext) =
-            context |> appConfig |> ProfileGetMe.run req log |> Async.StartAsTask
+            context |> appConfig |> User.GetMe.run req log |> Async.StartAsTask
 
     [<FunctionName("ProfilePut")>]
     let profilePut
@@ -67,4 +67,4 @@ module Functions =
         log: TraceWriter,
         context: ExecutionContext,
         id: Id) =
-            context |> appConfig |> ProfilePut.run req log id |> Async.StartAsTask
+            context |> appConfig |> User.Put.run req log id |> Async.StartAsTask

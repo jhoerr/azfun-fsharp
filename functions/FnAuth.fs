@@ -1,19 +1,17 @@
-namespace MyFunctions
+namespace MyFunctions.Auth
 
 open Chessie.ErrorHandling
-open Common
-open JwtUtil
+open MyFunctions.Common
 open Microsoft.AspNetCore.Http
 open Microsoft.Azure.WebJobs.Host
 open System.Net.Http
 open System.Collections.Generic
-open Microsoft.Extensions.Configuration
 
 ///<summary>
 /// This module provides a function to return "Pong!" to the calling client. 
 /// It demonstrates a basic GET request and response.
 ///</summary>
-module Auth =
+module Post =
     
     type ResponseModel = {
         access_token: string

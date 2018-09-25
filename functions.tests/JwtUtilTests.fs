@@ -2,7 +2,6 @@ module Tests
 
 open Chessie.ErrorHandling
 open MyFunctions.Common
-open MyFunctions.JwtUtil
 open System
 open Xunit
 open Xunit.Abstractions
