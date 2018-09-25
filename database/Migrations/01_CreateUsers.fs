@@ -8,9 +8,15 @@ type CreateUsers() =
   override __.Up() =
     base.Execute(@"CREATE TABLE Users(
       Id INT NOT NULL IDENTITY PRIMARY KEY,
-      Username VARCHAR(8) NOT NULL,
-      PreferredName VARCHAR(128) NOT NULL,
-      Department VARCHAR(128) NOT NULL,
+      Hash VARCHAR(128) NOT NULL,
+      NetId VARCHAR(16) NOT NULL,
+      Name VARCHAR(128) NOT NULL,
+      Department VARCHAR(16) NOT NULL,
+      LocationCode VARCHAR(4) NOT NULL,
+      Location VARCHAR(256) NULL,
+      CampusPhone VARCHAR(16) NULL,
+      CampusEmail VARCHAR(32) NOT NULL,
+      Position VARCHAR(128) NOT NULL,
       Expertise VARCHAR(256) NOT NULL,
     )")
 
