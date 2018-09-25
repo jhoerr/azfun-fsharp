@@ -38,7 +38,22 @@ jobs:
           root: /tmp/workspace
           paths:
             - publish
-  # Publish the deployment package to the Azure Function App
+  # Build (zip) a functions deployment package
+  build_package:
+    docker:
+      - image: circleci/node:8
+    steps:
+      - checkout 
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: 
+          name: Create Functions publish package
+          command: cd /tmp/workspace/publish && zip -r publish.zip ./*
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - publish/publish.zip
+  # Publish the deployment package to the TEST Azure Function App
   publish_to_test:
     docker:
       - image: microsoft/azure-cli
@@ -51,6 +66,19 @@ jobs:
       - run: 
           name: Publish Functions + SPA package to Test Function App
           command: az webapp deployment source config-zip --name $FUNCTION_APP_TEST --resource-group $FUNCTION_APP_TEST_RESOURCE_GROUP --src /tmp/workspace/publish/publish.zip
+  # Publish the deployment package to the PROD Azure Function App
+  publish_to_prod:
+    docker:
+      - image: microsoft/azure-cli
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Login with Azure Service Principal
+          command: az login --service-principal -u $SERVICE_PRINCIPAL_USER -p $SERVICE_PRINCIPAL_PASSWORD --tenant $SERVICE_PRINCIPAL_TENANT
+      - run: 
+          name: Publish Functions + SPA package to Test Function App
+          command: az webapp deployment source config-zip --name $FUNCTION_APP_PROD --resource-group $FUNCTION_APP_PROD_RESOURCE_GROUP --src /tmp/workspace/publish/publish.zip
 # Job orchestration
 workflows:
   version: 2
@@ -60,7 +88,16 @@ workflows:
     jobs:
       - build_functions:
           filters: *filter-ignore-gh-pages
-      - publish_to_test:
+      - build_package:
           requires:
             - build_functions
+          context: azfun-fsharp
+      - publish_to_test:
+          requires:
+            - build_package
+          context: azfun-fsharp
+      - publish_to_prod:
+          filters: *filter-only-master
+          requires:
+            - build_package
           context: azfun-fsharp
