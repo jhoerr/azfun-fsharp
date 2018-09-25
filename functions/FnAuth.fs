@@ -11,7 +11,7 @@ open System.Collections.Generic
 /// This module provides a function to return "Pong!" to the calling client. 
 /// It demonstrates a basic GET request and response.
 ///</summary>
-module Post =
+module Get =
     
     type ResponseModel = {
         access_token: string

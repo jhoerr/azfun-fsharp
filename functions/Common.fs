@@ -314,9 +314,11 @@ module Common =
         | exn ->
             fail (Status.Unauthorized, sprintf "Failed to decode access token: %s" (exn.Message))       
 
+
 /// *******************
 /// **  AUTH         **
 /// *******************
+
     let extractAuthHeader (req: HttpRequest) =
         let authHeader = 
             if req.Headers.ContainsKey("Authorization")

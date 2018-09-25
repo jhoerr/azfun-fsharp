@@ -41,7 +41,7 @@ module Functions =
         req: HttpRequest,
         log: TraceWriter,
         context: ExecutionContext) =
-            context |> appConfig |> Auth.Post.run req log |> Async.StartAsTask
+            context |> appConfig |> Auth.Get.run req log |> Async.StartAsTask
 
     [<FunctionName("ProfileGet")>]
     let profileGet
