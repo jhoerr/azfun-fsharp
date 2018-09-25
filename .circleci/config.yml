@@ -66,6 +66,28 @@ jobs:
       - run: 
           name: Publish Functions + SPA package to Test Function App
           command: az webapp deployment source config-zip --name $FUNCTION_APP_TEST --resource-group $FUNCTION_APP_TEST_RESOURCE_GROUP --src /tmp/workspace/publish/publish.zip
+  migrate_test_db:
+    docker:
+      - image: microsoft/dotnet:2.1-sdk
+    steps:
+      - checkout 
+      - run: 
+          name: Build database migrator
+          command: cd database && dotnet build
+      - run:
+          name: Migrate test database
+          command: dotnet database/bin/Debug/netcoreapp2.1/database.dll "$DATABASE_CONNECTION_TEST" up 
+  migrate_prod_db:
+    docker:
+      - image: microsoft/dotnet:2.1-sdk
+    steps:
+      - checkout 
+      - run: 
+          name: Build database migrator
+          command: cd database && dotnet build
+      - run:
+          name: Migrate test database
+          command: dotnet database/bin/Debug/netcoreapp2.1/database.dll "$DATABASE_CONNECTION_PROD" up 
   # Publish the deployment package to the PROD Azure Function App
   publish_to_prod:
     docker:
@@ -96,8 +118,17 @@ workflows:
           requires:
             - build_package
           context: azfun-fsharp
+      - migrate_test_db:
+          requires:
+            - build_functions
+          context: azfun-fsharp
       - publish_to_prod:
           filters: *filter-only-master
           requires:
             - build_package
+          context: azfun-fsharp
+      - migrate_prod_db:
+          filters: *filter-only-master
+          requires:
+            - build_functions
           context: azfun-fsharp
