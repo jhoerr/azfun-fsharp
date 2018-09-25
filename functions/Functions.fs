@@ -35,20 +35,6 @@ module Functions =
         log: TraceWriter) =
             Ping.run req log |> Async.StartAsTask
 
-    [<FunctionName("Hello")>]
-    let helloYou
-        ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "post", Route = "hello")>]
-        req: HttpRequest,
-        log: TraceWriter) =
-            Hello.run req log
-
-    [<FunctionName("Asset")>]
-    let assetFiles
-        ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "asset/{path}")>]
-        req: HttpRequest,
-        log: TraceWriter) =
-            Asset.run req log
-
     [<FunctionName("Auth")>]
     let auth
         ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "auth")>]
