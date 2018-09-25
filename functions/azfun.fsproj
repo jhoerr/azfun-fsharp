@@ -12,8 +12,10 @@
   </ItemGroup>
    <ItemGroup>
     <Compile Include="Common.fs" />
+    <Compile Include="Database.fs" />
     <Compile Include="FnAuth.fs" />
     <Compile Include="FnPing.fs" />
+    <Compile Include="FnSearch.fs" />
     <Compile Include="FnUser.fs" />
     <Compile Include="Functions.fs" />
   </ItemGroup>

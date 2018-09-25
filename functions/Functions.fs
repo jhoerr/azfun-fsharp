@@ -1,6 +1,6 @@
 namespace MyFunctions
 
-open Common
+open MyFunctions.Types
 open Chessie.ErrorHandling
 open Microsoft.Azure.WebJobs
 open Microsoft.AspNetCore.Http
@@ -28,14 +28,14 @@ module Functions =
             DbConnectionString = config.["DbConnectionString"]
         }
 
-    [<FunctionName("Ping")>]
+    [<FunctionName("PingGet")>]
     let ping
         ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "ping")>]
         req: HttpRequest,
         log: TraceWriter) =
             Ping.Get.run req log |> Async.StartAsTask
 
-    [<FunctionName("Auth")>]
+    [<FunctionName("AuthGet")>]
     let auth
         ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "auth")>]
         req: HttpRequest,
@@ -43,16 +43,16 @@ module Functions =
         context: ExecutionContext) =
             context |> appConfig |> Auth.Get.run req log |> Async.StartAsTask
 
-    [<FunctionName("ProfileGet")>]
+    [<FunctionName("UserGetId")>]
     let profileGet
-        ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "profile/{id}")>]
+        ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "users/{id}")>]
         req: HttpRequest,
         log: TraceWriter,
         context: ExecutionContext,
         id: Id) =
             context |> appConfig |> User.GetId.run req log id |> Async.StartAsTask
 
-    [<FunctionName("ProfileGetMe")>]
+    [<FunctionName("UserGetMe")>]
     let profileGetMe
         ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "me")>]
         req: HttpRequest,
@@ -60,11 +60,19 @@ module Functions =
         context: ExecutionContext) =
             context |> appConfig |> User.GetMe.run req log |> Async.StartAsTask
 
-    [<FunctionName("ProfilePut")>]
+    [<FunctionName("UserPut")>]
     let profilePut
-        ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "put", Route = "profile/{id}")>]
+        ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "put", Route = "users/{id}")>]
         req: HttpRequest,
         log: TraceWriter,
         context: ExecutionContext,
         id: Id) =
             context |> appConfig |> User.Put.run req log id |> Async.StartAsTask
+
+    [<FunctionName("SearchGet")>]
+    let searchSimpleGet
+        ([<HttpTrigger(Extensions.Http.AuthorizationLevel.Anonymous, "get", Route = "search")>]
+        req: HttpRequest,
+        log: TraceWriter,
+        context: ExecutionContext) =
+            context |> appConfig |> Search.GetSimple.run req log |> Async.StartAsTask

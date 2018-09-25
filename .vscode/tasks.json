@@ -58,7 +58,7 @@
       "label": "start",
       "identifier": "runFunctionsHost",
       "type": "shell",
-      "dependsOn": "build functions",
+      "dependsOn": "build",
       "group": {
         "kind": "build",
         "isDefault": true

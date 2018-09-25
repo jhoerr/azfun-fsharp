@@ -7,6 +7,7 @@ open System.Net
 open System.Net.Http
 open System.Net.Http.Headers
 open Chessie.ErrorHandling
+open Dapper
 open Microsoft.AspNetCore.Http
 open Microsoft.Azure.WebJobs.Host
 open Newtonsoft.Json
@@ -15,21 +16,10 @@ open JWT
 open JWT.Algorithms
 open JWT.Builder
 
-///<summary>
-/// This module contains common types and functions to facilitate request 
-/// handling and response creation. 
-///</summary>
-module Common =
-
-    // CONSTANTS
+module Types = 
 
     let ROLE_ADMIN = "admin"
     let ROLE_USER = "user"
-
-    // STATIC 
-    let client = new HttpClient()
-
-    // TYPES
 
     type Status = HttpStatusCode
 
@@ -48,12 +38,37 @@ module Common =
 
     type Id = int
     type Name = string
-    type GetRecords<'T> = unit -> Async<Result<list<'T>,(Status*string)>>
-    type GetRecordById<'T> = Id -> Async<Result<'T,(Status*string)>>
-    type GetRecordByName<'T> = Name -> Async<Result<'T,(Status*string)>>
-    type CreateRecord<'T> = 'T -> Async<Result<'T,(Status*string)>>
-    type UpdateRecord<'T> = Id -> 'T -> Async<Result<'T,(Status*string)>>
-    type DeleteRecord<'T> = Id -> Async<Result<'T,(Status*string)>>
+    type Department = string
+
+    [<CLIMutable>]
+    [<Table("Users")>]
+    type User = {
+        Id: Id
+        Hash: string
+        NetId: string
+        Name: Name
+        Department: Department
+        Position: string
+        LocationCode: string
+        Location: string
+        CampusPhone: string
+        CampusEmail: string
+        Expertise: string
+    }
+
+    type UserRequest = {
+        NetId: string
+    }
+
+///<summary>
+/// This module contains common types and functions to facilitate request 
+/// handling and response creation. 
+///</summary>
+module Common =
+    open Types 
+
+    // STATIC 
+    let client = new HttpClient()
 
     // UTILITY FUNCTIONS
 
@@ -61,6 +76,11 @@ module Common =
     /// An active pattern to identify empty sequences
     /// </summary>
     let (|EmptySeq|_|) a = if Seq.isEmpty a then Some () else None
+
+    let (|Int|_|) str =
+       match System.Int32.TryParse(str) with
+       | (true,int) -> Some(int)
+       | _ -> None
 
     /// <summary>
     /// Checks whether the string is null or empty
@@ -117,7 +137,28 @@ module Common =
     let getQueryParam paramName (req: HttpRequest) =
         if req.Query.ContainsKey paramName
         then ok (req.Query.[paramName].ToString())
-        else fail (Status.BadRequest,  (sprintf "Expected query string parameter: %s" paramName))
+        else fail (Status.BadRequest,  (sprintf "Query parameter '%s' is required." paramName))
+
+    let getQueryParamInt paramName (req: HttpRequest) = trial {
+        let asInt p =
+            match p with
+            | Int i -> ok i
+            | _ -> fail (Status.BadRequest, (sprintf "Query parameter '%s' must be a number" paramName))
+
+        let! queryParam = getQueryParam paramName req
+        let! result = asInt queryParam
+        return result
+    }
+
+    let getQueryParamInt' paramName min max (req: HttpRequest) = trial {
+        let inRange min max queryParam = 
+            if (queryParam < min || queryParam > max)
+            then fail (Status.BadRequest, (sprintf "Query parameter '%s' must be in range [%d, %d]" paramName min max))
+            else ok queryParam
+        let! intParam = getQueryParamInt paramName req
+        let! result = inRange min max intParam
+        return result
+    }
 
     let postAsync<'T> (url:string) (content:HttpContent) : Async<Result<'T,(HttpStatusCode*string)>> = async {
         try
