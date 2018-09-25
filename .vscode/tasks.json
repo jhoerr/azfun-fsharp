@@ -14,24 +14,7 @@
       "problemMatcher": "$msCompile"
     },
     {
-      "label": "build spa",
-      "type": "shell",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "options": {
-        "cwd": "${workspaceFolder}/app"
-      },
-      "command": "yarn build",
-      "isBackground": true,
-      "presentation": {
-        "reveal": "always"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "build functions",
+      "label": "build",
       "command": "dotnet build && cp local.settings.json bin/Debug/netstandard2.0",
       "type": "shell",
       "group": {
@@ -72,7 +55,7 @@
       "problemMatcher": "$msCompile"
     },
     {
-      "label": "start functions",
+      "label": "start",
       "identifier": "runFunctionsHost",
       "type": "shell",
       "dependsOn": "build functions",
@@ -89,25 +72,6 @@
         "reveal": "always"
       },
       "problemMatcher": []
-    },
-    {
-      "label": "start spa",
-      "identifier": "runSpaHost",
-      "type": "shell",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "options": {
-        "cwd": "${workspaceFolder}/app"
-      },
-      "command": "yarn start",
-      "isBackground": true,
-      "presentation": {
-        "reveal": "always"
-      },
-      "problemMatcher": []
     }
-
   ]
 }
