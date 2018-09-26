@@ -1,59 +1,26 @@
 {
     "$schema": "http://json.schemastore.org/proxies",
     "proxies": {
-        "proxy_root_slash": {
+        "api": {
             "matchCondition": {
-                "route": "/"
+                "route": "/static/css/main.06a917e2.css"
             },
-            "backendUri": "https://%ASSET_HOST%/app/index.html"
+            "backendUri": "https://%SPA_HOST%/app/static/css/main.06a917e2.css",
+            "debug": true
         },
-        "proxy_index_html": {
+        "appAsset": {
+            "matchCondition": {
+                "route": "/static/js/main.0793009d.js"
+            },
+            "backendUri": "https://%SPA_HOST%/app/static/js/main.0793009d.js",
+            "debug": true
+        },
+        "app": {
             "matchCondition": {
                 "route": "/index.html"
             },
-            "backendUri": "https://%ASSET_HOST%/app/index.html"
-        },
-        "proxy_index_manifest": {
-            "matchCondition": {
-                "route": "/manifest.json"
-            },
-            "backendUri": "https://%ASSET_HOST%/app/manifest.json"
-        },
-        "proxy_index_asset_manifest": {
-            "matchCondition": {
-                "route": "/asset-manifest.json"
-            },
-            "backendUri": "https://%ASSET_HOST%/app/asset-manifest.json"
-        },
-        "proxy_index_asset_service_worker": {
-            "matchCondition": {
-                "route": "/service-worker.js"
-            },
-            "backendUri": "https://%ASSET_HOST%/app/service-worker.js"
-        },
-        "proxy_index_asset_favicon": {
-            "matchCondition": {
-                "route": "/favicon.ico"
-            },
-            "backendUri": "https://%ASSET_HOST%/app/favicon.ico"
-        },
-        "proxy_static_css_files": {
-            "matchCondition": {
-                "route": "/static/css/{*path}"
-            },
-            "backendUri": "https://%ASSET_HOST%/app/static/css/{path}"
-        },
-        "proxy_static_js_files": {
-            "matchCondition": {
-                "route": "/static/js/{*path}"
-            },
-            "backendUri": "https://%ASSET_HOST%/app/static/js/{path}"
-        },
-        "proxy_static_media_files": {
-            "matchCondition": {
-                "route": "/static/media/{*path}"
-            },
-            "backendUri": "https://%ASSET_HOST%/app/static/media/{path}"
+            "backendUri": "https://%SPA_HOST%/app/index.html",
+            "debug": true
         }
     }
 }
