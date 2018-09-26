@@ -5,7 +5,7 @@
             "matchCondition": {
                 "route": "/"
             },
-            "backendUri": "https://%ASSET_HOST%/app/app/index.html"
+            "backendUri": "https://%ASSET_HOST%/app/index.html"
         },
         "proxy_index_html": {
             "matchCondition": {
