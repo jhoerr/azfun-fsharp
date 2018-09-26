@@ -38,7 +38,7 @@ commands:
           command: az login --service-principal -u $SERVICE_PRINCIPAL_USER -p $SERVICE_PRINCIPAL_PASSWORD --tenant $SERVICE_PRINCIPAL_TENANT
       - run: 
           name: Publish Functions + SPA package to Test Function App
-          command: az webapp deployment source config-zip --name $FUNCTION_APP_<<parameters.environment>> --resource-group $FUNCTION_APP_RESOURCE_GROUP_<<parameters.environment>> --src /tmp/workspace/publish/publish.zip
+          command: az webapp deployment source config-zip --name $FUNCTION_APP_<<parameters.environment>> --resource-group $RESOURCE_GROUP_<<parameters.environment>> --src /tmp/workspace/publish/publish.zip
   migrate_db:
     description: "Migrate database in specified environment"
     parameters:
