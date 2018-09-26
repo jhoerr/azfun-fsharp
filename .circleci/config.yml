@@ -58,8 +58,7 @@ commands:
 jobs:
   # Build and test the Azure Functions
   build:
-    docker:
-      - image: microsoft/dotnet:2.1-sdk
+    <<: *dotnetDefaults
     steps:
       - run:
           # A workspace allows us to pass files/artifacts from job to job.
@@ -120,15 +119,15 @@ workflows:
   # Publish the style guide on successful build/test of master.
   build-and-publish:
     jobs:
-      - build_functions:
+      - build:
           filters: *filter-ignore-gh-pages
-      - build_package:
+      - package:
           requires:
-            - build_functions
+            - build
           context: azfun-fsharp
       - publish_to_test:
           requires:
-            - build_package
+            - package
           context: azfun-fsharp
 #      - migrate_test_db:
 #          requires:
@@ -137,7 +136,7 @@ workflows:
       - publish_to_production:
           filters: *filter-only-master
           requires:
-            - build_package
+            - package
           context: azfun-fsharp
       - migrate_production_db:
           filters: *filter-only-master
