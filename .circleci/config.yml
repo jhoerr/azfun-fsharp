@@ -14,11 +14,50 @@ aliases:
   - &filter-ignore-gh-pages
     branches:
       ignore: gh-pages
-  
+
+defaults: &azureDefaults
+  docker:
+    - image: microsoft/azure-cli
+
+defaults: &dotnetDefaults
+  docker:
+    - image: microsoft/dotnet:2.1-sdk
+
+commands: 
+  publish:
+    description: "Publish package to specified environment"
+    parameters:
+      environment:
+        type: string
+        default: "test"
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Login with Azure Service Principal
+          command: az login --service-principal -u $SERVICE_PRINCIPAL_USER -p $SERVICE_PRINCIPAL_PASSWORD --tenant $SERVICE_PRINCIPAL_TENANT
+      - run: 
+          name: Publish Functions + SPA package to Test Function App
+          command: az webapp deployment source config-zip --name $FUNCTION_APP_<<parameters.environment>> --resource-group $FUNCTION_APP_RESOURCE_GROUP_<<parameters.environment>> --src /tmp/workspace/publish/publish.zip
+  migrate_db:
+    description: "Migrate database in specified environment"
+    parameters:
+      environment:
+        type: string
+        default: "test"
+    steps:
+      - checkout 
+      - run: 
+          name: Build database migrator
+          command: cd database && dotnet build
+      - run:
+          name: Migrate test database
+          command: dotnet database/bin/Debug/netcoreapp2.1/database.dll "$DB_CONNECTION_<<parameters.environment>>" up 
+
 # Job definitions. Job execution is orchestrated in the 'workflows' section.
 jobs:
   # Build and test the Azure Functions
-  build_functions:
+  build:
     docker:
       - image: microsoft/dotnet:2.1-sdk
     steps:
@@ -30,16 +69,16 @@ jobs:
       - checkout 
       - run: 
           name: Build Functions
-          command: cd functions && dotnet build
+          command: cd functions && dotnet build -c Release
       - run:
           name: Save compiled Functions to workspace
-          command: cp -a functions/bin/Debug/netstandard2.0/. /tmp/workspace/publish/
+          command: cp -a functions/bin/Release/netstandard2.0/. /tmp/workspace/publish/
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
             - publish
   # Build (zip) a functions deployment package
-  build_package:
+  package:
     docker:
       - image: circleci/node:8
     steps:
@@ -55,52 +94,25 @@ jobs:
             - publish/publish.zip
   # Publish the deployment package to the TEST Azure Function App
   publish_to_test:
-    docker:
-      - image: microsoft/azure-cli
+    <<: *azureDefaults
     steps:
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          name: Login with Azure Service Principal
-          command: az login --service-principal -u $SERVICE_PRINCIPAL_USER -p $SERVICE_PRINCIPAL_PASSWORD --tenant $SERVICE_PRINCIPAL_TENANT
-      - run: 
-          name: Publish Functions + SPA package to Test Function App
-          command: az webapp deployment source config-zip --name $FUNCTION_APP_TEST --resource-group $FUNCTION_APP_TEST_RESOURCE_GROUP --src /tmp/workspace/publish/publish.zip
+      - publish:
+          environment: "test"
+  publish_to_production:
+    <<: *azureDefaults
+    steps:
+      - publish:
+          environment: "production"
   migrate_test_db:
-    docker:
-      - image: microsoft/dotnet:2.1-sdk
+    <<: *dotnetDefaults
     steps:
-      - checkout 
-      - run: 
-          name: Build database migrator
-          command: cd database && dotnet build
-      - run:
-          name: Migrate test database
-          command: dotnet database/bin/Debug/netcoreapp2.1/database.dll "$DATABASE_CONNECTION_TEST" up 
-  migrate_prod_db:
-    docker:
-      - image: microsoft/dotnet:2.1-sdk
+      - migrate_db:
+          environment: "test"
+  migrate_production_db:
+    <<: *dotnetDefaults
     steps:
-      - checkout 
-      - run: 
-          name: Build database migrator
-          command: cd database && dotnet build
-      - run:
-          name: Migrate test database
-          command: dotnet database/bin/Debug/netcoreapp2.1/database.dll "$DATABASE_CONNECTION_PROD" up 
-  # Publish the deployment package to the PROD Azure Function App
-  publish_to_prod:
-    docker:
-      - image: microsoft/azure-cli
-    steps:
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          name: Login with Azure Service Principal
-          command: az login --service-principal -u $SERVICE_PRINCIPAL_USER -p $SERVICE_PRINCIPAL_PASSWORD --tenant $SERVICE_PRINCIPAL_TENANT
-      - run: 
-          name: Publish Functions + SPA package to Test Function App
-          command: az webapp deployment source config-zip --name $FUNCTION_APP_PROD --resource-group $FUNCTION_APP_PROD_RESOURCE_GROUP --src /tmp/workspace/publish/publish.zip
+      - migrate_db:
+          environment: "production"
 # Job orchestration
 workflows:
   version: 2
@@ -118,17 +130,17 @@ workflows:
           requires:
             - build_package
           context: azfun-fsharp
-      - migrate_test_db:
-          requires:
-            - build_functions
-          context: azfun-fsharp
-      - publish_to_prod:
+#      - migrate_test_db:
+#          requires:
+#            - publish_to_test
+#          context: azfun-fsharp
+      - publish_to_production:
           filters: *filter-only-master
           requires:
             - build_package
           context: azfun-fsharp
-      - migrate_prod_db:
+      - migrate_production_db:
           filters: *filter-only-master
           requires:
-            - build_functions
+            - publish_to_production
           context: azfun-fsharp
