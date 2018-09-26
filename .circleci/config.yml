@@ -24,7 +24,7 @@ defaults: &dotnetDefaults
     - image: microsoft/dotnet:2.1-sdk
 
 commands: 
-  publish:
+  deploy:
     description: "Publish package to specified environment"
     parameters:
       environment:
@@ -92,15 +92,15 @@ jobs:
           paths:
             - publish/publish.zip
   # Publish the deployment package to the TEST Azure Function App
-  publish_to_test:
+  deploy_to_test:
     <<: *azureDefaults
     steps:
-      - publish:
+      - deploy:
           environment: "test"
-  publish_to_production:
+  deploy_to_production:
     <<: *azureDefaults
     steps:
-      - publish:
+      - deploy:
           environment: "production"
   migrate_test_db:
     <<: *dotnetDefaults
@@ -117,7 +117,7 @@ workflows:
   version: 2
   # Build and test the code on every commit. 
   # Publish the style guide on successful build/test of master.
-  build-and-publish:
+  build-deploy-migrate:
     jobs:
       - build:
           filters: *filter-ignore-gh-pages
@@ -125,15 +125,15 @@ workflows:
           requires:
             - build
           context: azfun-fsharp
-      - publish_to_test:
+      - deploy_to_test:
           requires:
             - package
           context: azfun-fsharp
 #      - migrate_test_db:
 #          requires:
-#            - publish_to_test
+#            - deploy_to_test
 #          context: azfun-fsharp
-      - publish_to_production:
+      - deploy_to_production:
           filters: *filter-only-master
           requires:
             - package
@@ -141,5 +141,5 @@ workflows:
       - migrate_production_db:
           filters: *filter-only-master
           requires:
-            - publish_to_production
+            - deploy_to_production
           context: azfun-fsharp
