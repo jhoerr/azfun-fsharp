@@ -13,11 +13,23 @@
             },
             "backendUri": "https://%SPA_HOST%/app/index.html"
         },
+        "spaIndex": {
+            "matchCondition": {
+                "route": "/index.html"
+            },
+            "backendUri": "https://%SPA_HOST%/app/index.html"
+        },
+        "spaManifest": {
+            "matchCondition": {
+                "route": "/manifest.json"
+            },
+            "backendUri": "https://%SPA_HOST%/app/manifest.json"
+        },
         "spa": {
             "matchCondition": {
-                "route": "{*url}"
+                "route": "/static/{*url}"
             },
-            "backendUri": "https://%SPA_HOST%/app/{url}"
+            "backendUri": "https://%SPA_HOST%/app/static/{url}"
         }
     }
 }
