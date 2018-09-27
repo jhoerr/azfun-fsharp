@@ -30,6 +30,12 @@
                 "route": "/static/{*url}"
             },
             "backendUri": "https://%SPA_HOST%/app/static/{url}"
+        },
+        "spaRouting": {
+            "matchCondition": {
+                "route": "{*url}"
+            },
+            "backendUri": "https://%SPA_HOST%/app/index.html"
         }
     }
 }
