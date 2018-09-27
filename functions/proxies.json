@@ -7,31 +7,19 @@
             },
             "backendUri": "https://%API_HOST%/api/{url}"
         },
-        "spaRoot": {
-            "matchCondition": {
-                "route": "/"
-            },
-            "backendUri": "https://%SPA_HOST%/app/index.html"
-        },
-        "spaIndex": {
-            "matchCondition": {
-                "route": "/index.html"
-            },
-            "backendUri": "https://%SPA_HOST%/app/index.html"
-        },
         "spaManifest": {
             "matchCondition": {
                 "route": "/manifest.json"
             },
             "backendUri": "https://%SPA_HOST%/app/manifest.json"
         },
-        "spa": {
+        "spaAsset": {
             "matchCondition": {
                 "route": "/static/{*url}"
             },
             "backendUri": "https://%SPA_HOST%/app/static/{url}"
         },
-        "spaRouting": {
+        "spa": {
             "matchCondition": {
                 "route": "{*url}"
             },
