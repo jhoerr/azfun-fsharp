@@ -4,25 +4,6 @@
 #
 version: 2.1
 
-# Aliases are shorthand references for common settings.
-aliases:
-  # Branch Filtering
-  - &filter-only-master
-    branches:
-      only:
-        - master
-  - &filter-ignore-gh-pages
-    branches:
-      ignore: gh-pages
-
-defaults: &azureDefaults
-  docker:
-    - image: microsoft/azure-cli
-
-defaults: &dotnetDefaults
-  docker:
-    - image: microsoft/dotnet:2.1-sdk
-
 commands: 
   deploy:
     description: "Publish package to specified environment"
@@ -58,7 +39,8 @@ commands:
 jobs:
   # Build and test the Azure Functions
   build:
-    <<: *dotnetDefaults
+    docker:
+      - image: microsoft/dotnet:2.1-sdk
     steps:
       - run:
           # A workspace allows us to pass files/artifacts from job to job.
@@ -93,22 +75,26 @@ jobs:
             - publish/publish.zip
   # Publish the deployment package to the TEST Azure Function App
   deploy_to_test:
-    <<: *azureDefaults
+    docker:
+      - image: microsoft/azure-cli
     steps:
       - deploy:
           environment: "test"
   deploy_to_production:
-    <<: *azureDefaults
+    docker:
+      - image: microsoft/azure-cli
     steps:
       - deploy:
           environment: "production"
   migrate_test_db:
-    <<: *dotnetDefaults
+    docker:
+      - image: microsoft/dotnet:2.1-sdk
     steps:
       - migrate_db:
           environment: "test"
   migrate_production_db:
-    <<: *dotnetDefaults
+    docker:
+      - image: microsoft/dotnet:2.1-sdk
     steps:
       - migrate_db:
           environment: "production"
@@ -120,7 +106,9 @@ workflows:
   build-deploy-migrate:
     jobs:
       - build:
-          filters: *filter-ignore-gh-pages
+          filters:
+            branches:
+              ignore: gh-pages          
       - package:
           requires:
             - build
@@ -134,12 +122,14 @@ workflows:
 #            - deploy_to_test
 #          context: azfun-fsharp
       - deploy_to_production:
-          filters: *filter-only-master
+          filters:
+            branches:
+              only:
+                - master
           requires:
             - package
           context: azfun-fsharp
       - migrate_production_db:
-          filters: *filter-only-master
           requires:
             - deploy_to_production
           context: azfun-fsharp
