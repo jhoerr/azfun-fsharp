@@ -9,9 +9,8 @@ type CreateUsers() =
     base.Execute(@"CREATE TABLE Users(
       Id INT NOT NULL IDENTITY PRIMARY KEY,
       Hash VARCHAR(128) NOT NULL,
-      NetId VARCHAR(16) NOT NULL,
+      NetId VARCHAR(16) NOT NULL UNIQUE,
       Name VARCHAR(128) NOT NULL,
-      Department VARCHAR(16) NOT NULL,
       LocationCode VARCHAR(4) NOT NULL,
       Location VARCHAR(256) NULL,
       CampusPhone VARCHAR(16) NULL,

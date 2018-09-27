@@ -64,7 +64,7 @@ module Get =
 
     let run (req: HttpRequest) (log: TraceWriter) config = async {
         use cn = new SqlConnection(config.DbConnectionString);
-        let queryUserByName = queryUserByName cn
+        let queryUserByName = queryUserByNetId cn
         let! result = workflow req config queryUserByName |> Async.ofAsyncResult
         return constructResponse log result
     }

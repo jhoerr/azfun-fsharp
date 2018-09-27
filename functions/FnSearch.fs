@@ -19,7 +19,7 @@ module GetSimple =
     }
 
     let workflow (req: HttpRequest) config getSearchResults = asyncTrial {
-        let! _ = requireUserRole config req
+        let! _ = requireMembership config req
         let! term = getQueryParam "term" req
         let! page = getQueryParamInt "page" req
         let! items = getQueryParamInt' "items" 1 100 req 

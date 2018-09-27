@@ -16,10 +16,11 @@ open System.Net.Http
 /// It demonstrates a basic GET request and response.
 ///</summary>
 module GetMe =
-    let workflow (req: HttpRequest) (config:AppConfig) getProfileRecordByName = asyncTrial {
-        let! claims = requireUserRole config req
-        let! profile = bindAsyncResult (fun () -> getProfileRecordByName claims.UserName)
-        let response = profile |> jsonResponse Status.OK
+    let workflow (req: HttpRequest) (config:AppConfig) queryUserByNetId queryRolesByUser = asyncTrial {
+        let! claims = requireMembership config req
+        let! user = bindAsyncResult<User> (fun () -> queryUserByNetId claims.UserName)
+        let! roles = bindAsyncResult (fun () -> queryRolesByUser user.Id)
+        let response = {User=user; Roles=Seq.toArray roles} |> jsonResponse Status.OK
         return response
     }
 
@@ -28,8 +29,9 @@ module GetMe =
     /// </summary>
     let run (req: HttpRequest) (log: TraceWriter) config = async {
         use cn = new SqlConnection(config.DbConnectionString);
-        let getUserByName = queryUserByName cn
-        let! result = workflow req config getUserByName |> Async.ofAsyncResult
+        let queryUserByNetId = queryUserByNetId cn
+        let queryRolesByUser = queryRolesByUser cn
+        let! result = workflow req config queryUserByNetId queryRolesByUser |> Async.ofAsyncResult
         return constructResponse log result
     }
 
@@ -38,10 +40,11 @@ module GetMe =
 /// It demonstrates a basic GET request and response.
 ///</summary>
 module GetId =
-    let workflow (req: HttpRequest) (config:AppConfig) getProfileRecordById = asyncTrial {
-        let! _ = requireUserRole config req
-        let! profile = bindAsyncResult (fun () -> getProfileRecordById)
-        let response = profile |> jsonResponse Status.OK
+    let workflow (req: HttpRequest) (config:AppConfig) queryUserById queryRolesByUser = asyncTrial {
+        let! _ = requireMembership config req
+        let! user = bindAsyncResult (fun () -> queryUserById)
+        let! roles = bindAsyncResult (fun () -> queryRolesByUser)
+        let response = {User=user; Roles=Seq.toArray roles} |> jsonResponse Status.OK
         return response
     }
 
@@ -50,8 +53,9 @@ module GetId =
     /// </summary>
     let run (req: HttpRequest) (log: TraceWriter) id config = async {
         use cn = new SqlConnection(config.DbConnectionString);
-        let getUserById = queryUser cn id
-        let! result = workflow req config getUserById |> Async.ofAsyncResult
+        let queryUserById = queryUser cn id
+        let queryRolesByUser = queryRolesByUser cn id
+        let! result = workflow req config queryUserById queryRolesByUser |> Async.ofAsyncResult
         return constructResponse log result
     }
 
@@ -61,7 +65,7 @@ module Put =
     let validateUserCanEditRecord claims record = ok record
 
     let workflow (req: HttpRequest) (config:AppConfig) getProfileRecord updateProfileRecord = asyncTrial {
-        let! claims = requireUserRole config req
+        let! claims = requireMembership config req
         let! body = deserializeBody<User> req
         let! update = validatePostBody body
         let! record = bindAsyncResult (fun () -> getProfileRecord)

@@ -1,29 +1,35 @@
 {
     "$schema": "http://json.schemastore.org/proxies",
     "proxies": {
-        "api": {
-            "matchCondition": {
-                "route": "/api/{*url}"
-            },
-            "backendUri": "https://%WEBSITE_HOSTNAME%/api/{url}"
-        },
-        "spaIndex": {
+        "spaRoot": {
             "matchCondition": {
                 "route": "/"
             },
             "backendUri": "https://%SPA_HOST%/app/index.html"
+        },
+        "spaIndex": {
+            "matchCondition": {
+                "route": "/index.html"
+            },
+            "backendUri": "https://%SPA_HOST%/app/index.html"
+        },
+        "spaManifest": {
+            "matchCondition": {
+                "route": "/manifest.json"
+            },
+            "backendUri": "https://%SPA_HOST%/app/manifest.json"
+        },
+        "spaFavicon": {
+            "matchCondition": {
+                "route": "/favicon.ico"
+            },
+            "backendUri": "https://%SPA_HOST%/app/favicon.ico"
         },
         "spaAsset": {
             "matchCondition": {
                 "route": "/static/{*url}"
             },
             "backendUri": "https://%SPA_HOST%/app/static/{url}"
-        },
-        "spaRoot": {
-            "matchCondition": {
-                "route": "{*url}"
-            },
-            "backendUri": "https://%SPA_HOST%/app/{url}"
         }
     }
 }

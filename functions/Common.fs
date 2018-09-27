@@ -11,6 +11,7 @@ open Dapper
 open Microsoft.AspNetCore.Http
 open Microsoft.Azure.WebJobs.Host
 open Newtonsoft.Json
+open Newtonsoft.Json.Converters
 open Newtonsoft.Json.Serialization
 open JWT
 open JWT.Algorithms
@@ -38,16 +39,20 @@ module Types =
 
     type Id = int
     type Name = string
-    type Department = string
+    type NetId = string
+    type Role =
+        | SelfReport=1
+        | ItPro=2
+        | Manager=3
+        | Admin=4
 
     [<CLIMutable>]
     [<Table("Users")>]
     type User = {
         Id: Id
         Hash: string
-        NetId: string
+        NetId: NetId
         Name: Name
-        Department: Department
         Position: string
         LocationCode: string
         Location: string
@@ -56,9 +61,45 @@ module Types =
         Expertise: string
     }
 
+
+    [<CLIMutable>]
+    [<Table("Departments")>]
+    type Department = {
+        Id: Id
+        Name: Name
+    }
+
+    [<CLIMutable>]
+    [<Table("UserDepartments")>]
+    type UserDepartment = {
+        [<Key>]
+        UserId: Id
+        [<Key>]
+        DepartmentId: Id
+        Role: Role
+    }
+
+    [<CLIMutable>]
+    type UserRole = {
+        UserId: Id
+        Name: Name
+        NetId: NetId
+        DepartmentId: Id
+        Department: Name
+        [<JsonConverter(typedefof<StringEnumConverter>)>]
+        Role: Role
+    }
+
+
     type UserRequest = {
         NetId: string
     }
+
+    type UserReponse = {
+        User: User
+        Roles: array<UserRole>
+    }
+
 
 ///<summary>
 /// This module contains common types and functions to facilitate request 
@@ -282,8 +323,7 @@ module Common =
 /// *******************
 
     type JwtClaims = {
-        UserName: string
-        UserRole: string
+        UserName: NetId
         Expiration: System.DateTime
     }
 
@@ -321,7 +361,6 @@ module Common =
                     .Decode<IDictionary<string, obj>>(jwt)
             let claims = {
                 UserName = decoded.[UserNameClaim] |> string
-                UserRole = ""
                 Expiration = decoded.[ExpClaim] |> decodeExp
             }
             ok claims
@@ -343,7 +382,6 @@ module Common =
                     .Decode<IDictionary<string, string>>(jwt)
             let claims = {
                 UserName = decoded.[UserNameClaim] |> string
-                UserRole = decoded.[UserRoleClaim] |> string
                 Expiration = decoded.[ExpClaim] |> decodeExp
             }
             ok claims
@@ -381,20 +419,8 @@ module Common =
         let! claims = decodeAppJwt secret jwt
         return claims
     }
-
-    let validateRole roles (claims:JwtClaims) =
-        if roles |> Seq.exists (fun role -> claims.UserRole = role)
-        then ok claims
-        else fail (Status.Forbidden, "You do not have the required permissions to peform this task.")
-
-    let requireAdminRole (config:AppConfig) (req: HttpRequest) = trial {
-        let! claims = validateAuth config.JwtSecret req
-        let! user = validateRole [ROLE_ADMIN] claims
-        return user
-    }
     
-    let requireUserRole (config:AppConfig) (req: HttpRequest) = trial {
+    let requireMembership (config:AppConfig) (req: HttpRequest) = trial {
         let! claims = validateAuth config.JwtSecret req
-        let! user = validateRole [ROLE_USER; ROLE_ADMIN] claims
-        return user
+        return claims
     }
