@@ -9,21 +9,21 @@
         },
         "spaIndex": {
             "matchCondition": {
-                "route": "/index.html"
+                "route": "/"
             },
             "backendUri": "https://%SPA_HOST%/app/index.html"
         },
-        "spaJs": {
+        "spaAsset": {
             "matchCondition": {
-                "route": "/static/js/main.0793009d.js"
+                "route": "/static/{*url}"
             },
-            "backendUri": "https://%SPA_HOST%/app/static/js/main.0793009d.js"
+            "backendUri": "https://%SPA_HOST%/app/static/{url}"
         },
-        "spaCss": {
+        "spaRoot": {
             "matchCondition": {
-                "route": "/static/css/main.06a917e2.css"
+                "route": "{*url}"
             },
-            "backendUri": "https://%SPA_HOST%/app/static/css/main.06a917e2.css"
+            "backendUri": "https://%SPA_HOST%/app/{url}"
         }
     }
 }
